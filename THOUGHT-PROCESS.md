@@ -134,6 +134,22 @@ The fit route imports `extractPlainText` — a function separate from the ingest
 pipeline — so there is no reachable code path from it to `saveFile` or
 `addItem`. Structural, not a promise.
 
+### A pool of Gemini keys, not one
+
+Free-tier per-minute quotas are low enough that a live demo can trip them, and a
+429 is indistinguishable from a broken app to anyone watching.
+
+Rotation alone is not enough — round-robin over a rate-limited key just spreads
+the failure. So a key that returns 429 is **benched** with exponential backoff
+and the request fails over immediately, while genuine errors (bad schema,
+invalid key) are deliberately *not* retried across keys: another key cannot fix
+them, and trying burns quota that the demo needs.
+
+One subtlety serverless forces: module state resets on every cold start, so a
+fixed starting index would send every new instance to key #1 and undo the
+spreading. The cursor starts at a random offset instead, so instances
+self-distribute without coordinating.
+
 ### Degrade in layers
 
 Every AI dependency has a floor:

@@ -9,6 +9,13 @@ import postgres from "postgres";
  * path that can touch an unmigrated database.
  */
 
+/**
+ * Bump this whenever schema.sql changes. It is compared against the value
+ * stored in `chronicle_meta`, and the DDL only runs when the database is
+ * behind — so a migration that is not accompanied by a bump will not apply.
+ */
+const SCHEMA_VERSION = 3;
+
 let client: postgres.Sql | null = null;
 let migration: Promise<void> | null = null;
 
@@ -43,21 +50,22 @@ export async function db(): Promise<postgres.Sql> {
   migration ??= (async () => {
     // A serverless deployment cold-starts constantly, so re-running the whole
     // DDL batch every time is both wasteful and risky: multi-statement DDL is
-    // the one thing a transaction pooler handles badly. Check first — the
-    // probe is a single indexed catalog lookup.
+    // the one thing a transaction pooler handles badly. So skip it when the
+    // database is already current.
+    //
+    // "Current" is a version number, not the presence of some column. An
+    // earlier version of this probed for `items.user_id`, which meant every
+    // schema change after that column shipped was silently skipped on any
+    // database that already had it. Bumping SCHEMA_VERSION is now the single
+    // thing that makes a migration apply.
     try {
-      const [ready] = await sql<{ ok: boolean }[]>`
-        select exists (
-          select 1 from information_schema.columns
-          where table_schema = 'public'
-            and table_name = 'items'
-            and column_name = 'user_id'
-        ) as ok
+      const [row] = await sql<{ value: string }[]>`
+        select value from chronicle_meta where key = 'schema_version'
       `;
-      if (ready?.ok) return;
+      if (row && Number(row.value) >= SCHEMA_VERSION) return;
     } catch {
-      // Probe failed (no permissions, fresh database) — fall through and let
-      // the real migration produce a meaningful error instead.
+      // No chronicle_meta yet — a fresh or pre-versioning database. Fall
+      // through and run the DDL, which creates it.
     }
 
     const file = path.join(process.cwd(), "src", "lib", "schema.sql");

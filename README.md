@@ -80,7 +80,7 @@ on the first request that touches the database. There is no migration command.
 | Key | Required | Where from |
 |---|---|---|
 | `DATABASE_URL` | ✅ | Supabase **session pooler** (`:5432`) for a long-running server, **transaction pooler** (`:6543`) for serverless |
-| `GEMINI_API_KEY` | ✅ | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| `GEMINI_API_KEY` **or** `GEMINI_API_KEYS` | ✅ | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — several keys rotate, see below |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | ✅ | Google Cloud Console → Credentials → OAuth client (Web) |
 | `AUTH_SECRET` | ✅ | `openssl rand -base64 32` |
 | `TELEGRAM_BOT_TOKEN` | – | @BotFather |
@@ -90,6 +90,28 @@ on the first request that touches the database. There is no migration command.
 
 OAuth redirect URI must match exactly:
 `https://<your-host>/api/auth/callback/google`
+
+### Rotating Gemini keys
+
+Free-tier keys have low per-minute quotas, and hitting one mid-demo looks
+identical to the app being broken. Chronicle accepts a pool and rotates across
+it:
+
+```bash
+GEMINI_API_KEYS=key_one,key_two,key_three
+# or GEMINI_API_KEY_1 / _2 / _3 — both forms are read and de-duplicated
+```
+
+Requests are spread across the pool. A key that returns 429 is **benched** with
+exponential backoff (10s → 20s → 40s, capped at two minutes) rather than
+retried into the same wall, and the request immediately fails over to the next
+key. A success clears that key's history. Genuine errors — a bad schema, an
+invalid key — are *not* retried across keys, because another key cannot fix
+them and doing so would waste quota.
+
+`npm run check:api` tests **every** key in the pool. One dead key is worse than
+none: the app keeps handing it work and one request in three fails for no
+visible reason.
 
 ---
 
@@ -144,7 +166,7 @@ npm run dev         # local development
 npm run build       # production build
 npm run check:env   # env vars: format, quotes, whitespace, placeholders
 npm run check:db    # connectivity, pgvector, schema, vector operators
-npm run check:api   # live Gemini call, confirms both models reachable
+npm run check:api   # live Gemini call against EVERY key in the pool
 ```
 
 ---
@@ -160,7 +182,8 @@ src/
     p/[handle]/     public profile (the only unauthenticated page)
     login/
   lib/
-    gemini.ts       model client, embeddings, retry
+    gemini.ts       model calls and embeddings
+    keyring.ts      rotating key pool with failover
     extract.ts      document → structured record (and transient text for JDs)
     relate.ts       two-pass relationship engine
     search.ts       hybrid retrieval

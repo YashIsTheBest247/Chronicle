@@ -105,3 +105,16 @@ create index if not exists relations_user_idx  on relations (user_id);
 create index if not exists relations_from_idx  on relations (from_id);
 create index if not exists relations_to_idx    on relations (to_id);
 
+-- ---------------------------------------------------------------------------
+-- Version marker. `db()` reads this to decide whether the DDL above needs to
+-- run at all, so bumping SCHEMA_VERSION in db.ts is what makes a new migration
+-- apply. Written last: if anything above fails, the version is not advanced
+-- and the next request retries the whole file.
+-- ---------------------------------------------------------------------------
+create table if not exists chronicle_meta (
+  key   text primary key,
+  value text not null
+);
+
+insert into chronicle_meta (key, value) values ('schema_version', '3')
+on conflict (key) do update set value = excluded.value;

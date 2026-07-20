@@ -93,14 +93,32 @@ check("DATABASE_URL", {
   hint: "must be a full postgresql:// URL including the password (percent-encode @ as %40)",
 });
 
-check("GEMINI_API_KEY", {
-  required: true,
-  // Google issues both "AIza…" (older) and "AQ.…" (newer AI Studio) keys, so
-  // this only checks it is a plausible opaque token. Format alone cannot
-  // prove a key works — `npm run check:api` calls the real API for that.
-  test: (v) => v.length > 20 && !/\s/.test(v),
-  hint: "should be a single opaque token from aistudio.google.com/apikey",
-});
+// A key may arrive as GEMINI_API_KEY, GEMINI_API_KEYS (comma-separated) or
+// GEMINI_API_KEY_1..n. At least one route must be populated.
+const keyNames = [...raw.keys()].filter((k) =>
+  /^GEMINI_API_KEYS?$|^GEMINI_API_KEY_\d+$/.test(k),
+);
+const poolKeys = keyNames.flatMap((n) =>
+  (raw.get(n) ?? "").split(",").map((k) => k.trim()).filter(Boolean),
+);
+
+if (poolKeys.length === 0) {
+  problems.push("✗ No Gemini key set (GEMINI_API_KEY or GEMINI_API_KEYS)");
+  bad++;
+} else {
+  const malformed = poolKeys.filter((k) => k.length < 20 || /\s/.test(k));
+  if (malformed.length) {
+    problems.push(`✗ ${malformed.length} Gemini key(s) look malformed (too short, or contain spaces)`);
+    bad++;
+  } else {
+    const unique = new Set(poolKeys).size;
+    console.log(
+      `✓ ${"GEMINI keys".padEnd(26)} ${poolKeys.length} configured` +
+        (unique < poolKeys.length ? `  (${poolKeys.length - unique} duplicate ignored)` : "") +
+        (unique > 1 ? "  — rotating" : ""),
+    );
+  }
+}
 
 check("AUTH_GOOGLE_ID", {
   required: true,

@@ -225,6 +225,8 @@ Each layer degrades on its own rather than taking the app down.
 
 | Failure | Result |
 |---|---|
+| One Gemini key rate-limited | Benched with backoff; request fails over to the next key in the pool |
+| Every Gemini key rate-limited | Waits briefly for the soonest to recover, bounded so a request cannot hang |
 | No Gemini key | Lexical ranking still returns records; the bot says so once |
 | Embedding call fails | Query falls back to the full table |
 | Answer generation fails | A deterministic summary line is used |

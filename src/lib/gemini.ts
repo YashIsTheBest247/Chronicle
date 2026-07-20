@@ -1,5 +1,5 @@
 import "server-only";
-import { GoogleGenAI } from "@google/genai";
+import { hasAnyKey, withKey } from "./keyring";
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const EMBED_MODEL = process.env.GEMINI_EMBED_MODEL || "gemini-embedding-001";
@@ -7,20 +7,8 @@ const EMBED_MODEL = process.env.GEMINI_EMBED_MODEL || "gemini-embedding-001";
 /** Dimensionality we request from the embedding model and store on items. */
 export const EMBED_DIM = 768;
 
-let client: GoogleGenAI | null = null;
-
 export function hasKey(): boolean {
-  return Boolean(process.env.GEMINI_API_KEY);
-}
-
-function ai(): GoogleGenAI {
-  if (!hasKey()) {
-    throw new Error(
-      "GEMINI_API_KEY is not set. Copy .env.example to .env.local and add a key from https://aistudio.google.com/apikey",
-    );
-  }
-  client ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  return client;
+  return hasAnyKey();
 }
 
 /**
@@ -45,8 +33,8 @@ export async function generateJSON<T>(args: {
   }
   parts.push({ text: args.prompt });
 
-  const res = await withRetry(() =>
-    ai().models.generateContent({
+  const res = await withKey((ai) =>
+    ai.models.generateContent({
       model: MODEL,
       contents: [{ role: "user", parts }],
       config: {
@@ -65,8 +53,8 @@ export async function generateJSON<T>(args: {
 
 /** Short free-text generation — used for the answer line above search results. */
 export async function generateText(prompt: string, system?: string) {
-  const res = await withRetry(() =>
-    ai().models.generateContent({
+  const res = await withKey((ai) =>
+    ai.models.generateContent({
       model: MODEL,
       contents: prompt,
       config: { systemInstruction: system, temperature: 0.3 },
@@ -84,8 +72,8 @@ export async function embed(
   taskType: "RETRIEVAL_DOCUMENT" | "RETRIEVAL_QUERY" = "RETRIEVAL_DOCUMENT",
 ): Promise<number[][]> {
   if (texts.length === 0) return [];
-  const res = await withRetry(() =>
-    ai().models.embedContent({
+  const res = await withKey((ai) =>
+    ai.models.embedContent({
       model: EMBED_MODEL,
       contents: texts,
       config: { taskType, outputDimensionality: EMBED_DIM },
@@ -116,19 +104,3 @@ export function cosine(a: number[], b: number[]): number {
   return dot;
 }
 
-/** Retries the transient failures — rate limits and 5xx — with backoff. */
-async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
-  let lastError: unknown;
-  for (let i = 0; i < attempts; i++) {
-    try {
-      return await fn();
-    } catch (err) {
-      lastError = err;
-      const msg = String(err);
-      const retryable = /429|older|RESOURCE_EXHAUSTED|50\d|UNAVAILABLE|fetch/i.test(msg);
-      if (!retryable || i === attempts - 1) break;
-      await new Promise((r) => setTimeout(r, 700 * 2 ** i));
-    }
-  }
-  throw lastError;
-}

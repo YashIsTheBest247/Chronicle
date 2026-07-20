@@ -13,8 +13,8 @@ export default function AppLayout({
     <SessionProvider>
       <div className="min-h-dvh">
         <AppNav />
-        {/* Extra top padding on small screens clears the wrapped tab row. */}
-        <main className="mx-auto max-w-6xl px-4 pt-36 pb-16 sm:px-5 md:pt-28">
+        {/* Clears the floating bar; the mobile menu is an overlay, not a row. */}
+        <main className="mx-auto max-w-6xl px-4 pt-24 pb-16 sm:px-5 sm:pt-28">
           <PageTransition>{children}</PageTransition>
         </main>
       </div>
