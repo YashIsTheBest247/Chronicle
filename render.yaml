@@ -1,0 +1,45 @@
+# Render blueprint. In Render: New → Blueprint → point at this repo.
+#
+# Chronicle is ONE service — the Next.js app serves both the UI and the API
+# routes under /api. There is no separate backend to deploy.
+#
+# The database is deliberately NOT defined here: Render's free Postgres is
+# deleted 30 days after creation. Use Neon (or Supabase) and paste the
+# connection string into DATABASE_URL below.
+
+services:
+  - type: web
+    name: chronicle
+    runtime: node
+    plan: free
+    # `npm ci` installs devDependencies too — Next needs TypeScript and
+    # Tailwind at build time, so do not add --omit=dev here.
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+
+      # --- required -------------------------------------------------------
+      # Postgres with pgvector. Chronicle creates its own tables and the HNSW
+      # index on first request, so there is no migration step to run.
+      - key: DATABASE_URL
+        sync: false
+      # https://aistudio.google.com/apikey
+      - key: GEMINI_API_KEY
+        sync: false
+
+      # --- optional: Telegram bot ----------------------------------------
+      # Leave blank to disable. The allowlist is required for the bot to
+      # answer anyone: empty means "deny all", never "allow all".
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_WEBHOOK_SECRET
+        generateValue: true
+      - key: TELEGRAM_ALLOWED_CHAT_IDS
+        sync: false
+      # Public link behind the landing page's "Chat on Telegram" button.
+      - key: NEXT_PUBLIC_TELEGRAM_URL
+        sync: false

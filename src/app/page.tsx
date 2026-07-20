@@ -8,7 +8,6 @@ import {
   Languages,
   Link2,
   Search,
-  Send,
   Upload,
   Users,
   Waypoints,
@@ -17,13 +16,7 @@ import { Logo } from "@/components/Logo";
 import { SiteNav } from "@/components/SiteNav";
 import { HeroVisual } from "@/components/HeroVisual";
 import { Reveal } from "@/components/Reveal";
-
-/**
- * Placeholder for the Telegram bot. The button is presentational for now —
- * swap this for the real handle (https://t.me/<bot>) once the bot exists and
- * nothing else has to change.
- */
-const TELEGRAM_URL = "#";
+import { TelegramButton } from "@/components/TelegramButton";
 
 export default function Landing() {
   return (
@@ -121,13 +114,7 @@ function Hero() {
               >
                 See the demo
               </Link>
-              <a
-                href={TELEGRAM_URL}
-                className="btn w-full border border-white/20 !px-5 !py-3 text-white hover:bg-white/10 sm:w-auto"
-              >
-                <Send size={16} />
-                Chat on Telegram
-              </a>
+              <TelegramButton className="btn w-full border border-white/20 !px-5 !py-3 text-white hover:bg-white/10 sm:w-auto" />
             </div>
 
             {/* One line, always: a colour cluster standing in for the six

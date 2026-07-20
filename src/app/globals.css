@@ -75,6 +75,15 @@
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  /* The nav floats over the page, so an anchor jump would otherwise park the
+     section heading underneath it. Every id is offset by the bar's height
+     plus its top inset. */
+  :target,
+  [id] {
+    scroll-margin-top: 6.5rem;
   }
 
   body {
@@ -457,6 +466,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    /* Smooth scrolling is motion too — jump instantly instead. */
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {
