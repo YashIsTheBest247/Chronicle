@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check:db": "node scripts/check-db.mjs"
   },
   "engines": {
     "node": ">=20 <23"
