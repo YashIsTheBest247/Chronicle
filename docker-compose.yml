@@ -1,0 +1,28 @@
+# Local Postgres with pgvector, for developing without a hosted database.
+#
+#   docker compose up -d
+#   DATABASE_URL=postgresql://postgres:chronicle@127.0.0.1:55432/chronicle
+#
+# Chronicle creates its own tables and the HNSW vector index on first request,
+# so there is no migration step to run by hand.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: chronicle-pg
+    environment:
+      POSTGRES_PASSWORD: chronicle
+      POSTGRES_DB: chronicle
+    ports:
+      # 55432 on the host so it cannot collide with a local Postgres on 5432.
+      - "55432:5432"
+    volumes:
+      - chronicle-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  chronicle-pgdata:

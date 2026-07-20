@@ -1,0 +1,466 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Chronicle — design tokens
+   Warm editorial paper palette. Neutrals carry the page; the
+   accent set is reserved for category identity and never
+   decorates chrome.
+   ============================================================ */
+
+:root {
+  --c-canvas: 255 255 255;
+  --c-paper: 255 255 255;
+  --c-linen: 251 251 250;
+  --c-mist: 244 244 245;
+  --c-panel: 245 245 246;
+  --c-ink: 22 20 15;
+  --c-graphite: 52 50 44;
+  --c-muted: 103 100 93;
+  --c-faint: 154 150 142;
+  --c-line: 231 230 227;
+  --c-lineSoft: 240 239 236;
+  --c-fg: 22 20 15;
+  color-scheme: light;
+}
+
+.dark {
+  --c-canvas: 14 13 11;
+  --c-paper: 26 24 20;
+  --c-linen: 245 243 239;
+  --c-mist: 37 34 28;
+  --c-panel: 18 16 14;
+  --c-ink: 22 20 15;
+  --c-graphite: 203 200 193;
+  --c-muted: 160 156 147;
+  --c-faint: 122 117 108;
+  --c-line: 45 42 37;
+  --c-lineSoft: 37 34 29;
+  --c-fg: 237 235 231;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: rgb(var(--c-canvas));
+  --color-paper: rgb(var(--c-paper));
+  --color-linen: rgb(var(--c-linen));
+  --color-mist: rgb(var(--c-mist));
+  --color-panel: rgb(var(--c-panel));
+  --color-ink: rgb(var(--c-ink));
+  --color-graphite: rgb(var(--c-graphite));
+  --color-muted: rgb(var(--c-muted));
+  --color-faint: rgb(var(--c-faint));
+  --color-line: rgb(var(--c-line));
+  --color-lineSoft: rgb(var(--c-lineSoft));
+  --color-fg: rgb(var(--c-fg));
+
+  /* Brand blue. The per-category accents live in lib/types.ts instead —
+     they are applied through inline styles, which Tailwind cannot scan, so
+     a theme variable here would be tree-shaken away. */
+  --color-brand: #2d6bff;
+  --color-brand-deep: #1a49bd;
+
+  --font-display: "Familjen Grotesk", "Hanken Grotesk", system-ui, sans-serif;
+  --font-sans: "Hanken Grotesk", system-ui, sans-serif;
+  --font-serif: "Fraunces", Georgia, serif;
+
+  --radius-card: 1.75rem;
+  --radius-panel: 1rem;
+}
+
+@layer base {
+  * {
+    border-color: rgb(var(--c-line));
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: rgb(var(--c-canvas));
+    color: rgb(var(--c-fg));
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    font-feature-settings: "ss01", "cv01";
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.022em;
+    font-weight: 600;
+  }
+
+  ::selection {
+    background: rgb(45 107 255 / 0.16);
+  }
+}
+
+@layer components {
+  /* Editorial eyebrow label above section headings */
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--c-faint));
+  }
+
+  /* Italic serif accent — used for a single emphasised word */
+  .accent {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .card {
+    background: rgb(var(--c-paper));
+    border: 1px solid rgb(var(--c-line));
+    border-radius: var(--radius-card);
+  }
+
+  .panel {
+    background: rgb(var(--c-panel));
+    border: 1px solid rgb(var(--c-lineSoft));
+    border-radius: var(--radius-panel);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(var(--c-line));
+    padding: 0.3125rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    font-weight: 550;
+    font-size: 1rem;
+    padding: 0.6875rem 1.3125rem;
+    /* Springy easing on transform, linear-ish on colour — a button should
+       feel like it has mass without the colour lagging behind the press. */
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.25s ease,
+      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+  .btn:active {
+    transform: translateY(0) scale(0.97);
+    /* Snap back fast on release so the press reads as responsive. */
+    transition-duration: 0.06s;
+  }
+  .btn:focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 3px;
+  }
+
+  /* Icons inside a button drift with the direction they imply on hover */
+  .btn:hover svg:last-child:not(:first-child) {
+    transform: translateX(1.5px);
+  }
+  .btn svg {
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .btn-primary {
+    background: rgb(var(--c-fg));
+    color: rgb(var(--c-canvas));
+  }
+  .btn-primary:hover {
+    background: rgb(var(--c-graphite));
+  }
+
+  .btn-ghost {
+    border: 1px solid rgb(var(--c-line));
+    color: rgb(var(--c-fg));
+    background: transparent;
+  }
+  .btn-ghost:hover {
+    background: rgb(var(--c-mist));
+  }
+
+  /* Floating pill navigation — detached from the viewport edge, fully
+     rounded, and tinted to whatever it is currently sitting over. */
+  .nav-shell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  .nav-shell-light {
+    background: rgb(var(--c-paper) / 0.92);
+    border: 1px solid rgb(var(--c-line));
+    box-shadow: 0 10px 34px -22px rgb(22 20 15 / 0.5);
+    backdrop-filter: blur(20px);
+  }
+  .nav-shell-dark {
+    background: rgb(28 26 22 / 0.72);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    backdrop-filter: blur(20px);
+  }
+
+  .nav-link {
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    font-size: 1.0625rem;
+    font-weight: 550;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease;
+  }
+
+  /* Inverted pill button — white on dark surfaces */
+  .btn-invert {
+    background: rgb(var(--c-canvas));
+    color: rgb(var(--c-fg));
+  }
+  .btn-invert:hover {
+    background: rgb(var(--c-linen));
+  }
+
+  /* The large dark slab used for section CTAs */
+  .slab {
+    border-radius: 2.5rem;
+    background: #16140f;
+    color: #edebe7;
+    position: relative;
+    overflow: hidden;
+  }
+  .slab::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      60rem 30rem at 50% 120%,
+      rgb(194 100 31 / 0.16),
+      transparent 65%
+    );
+    pointer-events: none;
+  }
+
+  /* Oversized wordmark sitting behind footer/section content */
+  .watermark {
+    position: absolute;
+    inset-inline: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    /* Sized against the viewport, not a type scale: this is a full-bleed
+       graphic that should touch both edges at every width. */
+    font-size: 20.5vw;
+    letter-spacing: -0.055em;
+    line-height: 0.78;
+    text-align: center;
+    color: rgb(255 255 255 / 0.05);
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* Faint paper grain + horizon wash behind the hero */
+  .paper-wash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        70rem 34rem at 50% -12%,
+        rgb(45 107 255 / 0.07),
+        transparent 62%
+      ),
+      radial-gradient(
+        44rem 26rem at 88% 8%,
+        rgb(176 122 30 / 0.06),
+        transparent 60%
+      );
+  }
+  .dark .paper-wash {
+    background:
+      radial-gradient(
+        70rem 34rem at 50% -12%,
+        rgb(45 107 255 / 0.13),
+        transparent 62%
+      ),
+      radial-gradient(
+        44rem 26rem at 88% 8%,
+        rgb(176 122 30 / 0.08),
+        transparent 60%
+      );
+  }
+
+  /* Hairline rule that fades at both ends */
+  .rule-fade {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--c-line)),
+      transparent
+    );
+  }
+}
+
+@layer utilities {
+  /* Fluid display sizes. clamp() scales continuously with the viewport, so
+     headlines never jump at a breakpoint and never overflow a narrow phone. */
+  .t-hero {
+    font-size: clamp(2.25rem, 5.8vw, 3.875rem);
+    line-height: 1.02;
+    letter-spacing: -0.032em;
+  }
+  .t-section {
+    font-size: clamp(1.875rem, 4.6vw, 3.25rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .t-sub {
+    font-size: clamp(1rem, 1.35vw, 1.1875rem);
+    line-height: 1.6;
+  }
+  .t-page {
+    font-size: clamp(1.5rem, 3.4vw, 2rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgb(var(--c-line));
+    border-radius: 9999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* ---------------------------------------------------------------- motion -- */
+
+/* Scroll reveal. Elements start displaced and are released by the Reveal
+   component adding [data-visible]; staggering is done with a CSS variable so
+   a list can cascade without per-item classes. */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Pressable surfaces that are not .btn — cards, pills, tiles */
+.pressable {
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+.pressable:active {
+  transform: scale(0.985);
+  transition-duration: 0.06s;
+}
+
+/* Route change fade — paired with the key on the app layout's main element */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page-in {
+  animation: page-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Skeleton shimmer for loading states */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgb(var(--c-mist));
+  border-radius: 0.5rem;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--c-line) / 0.55),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
