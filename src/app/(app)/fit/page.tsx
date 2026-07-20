@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import {
   Check,
   Copy,
   FileText,
+  FileUp,
   Loader2,
   Sparkles,
   Target,
@@ -49,18 +50,15 @@ export default function FitPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  async function run() {
-    if (jd.trim().length < 40) return;
+  async function send(init: RequestInit) {
     setBusy(true);
     setError(null);
     setFit(null);
     try {
-      const res = await fetch("/api/fit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobDescription: jd, withResume }),
-      });
+      const res = await fetch("/api/fit", { method: "POST", ...init });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? "Could not assess this.");
       setFit(body);
@@ -69,6 +67,25 @@ export default function FitPage() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function run() {
+    if (jd.trim().length < 40) return;
+    setFileName(null);
+    void send({
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobDescription: jd, withResume }),
+    });
+  }
+
+  /** The posting is read server-side and discarded — it is never stored. */
+  function runFile(file: File) {
+    setFileName(file.name);
+    setJd("");
+    const form = new FormData();
+    form.append("file", file);
+    form.append("withResume", String(withResume));
+    void send({ body: form });
   }
 
   const met = fit?.requirements.filter((r) => r.met).length ?? 0;
@@ -106,6 +123,26 @@ export default function FitPage() {
             {busy ? t("fit.working") : t("fit.cta")}
           </button>
 
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={busy}
+            className="btn btn-ghost disabled:opacity-40"
+          >
+            <FileUp size={15} />
+            {t("fit.upload")}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            hidden
+            accept=".pdf,.png,.jpg,.jpeg,.webp,.docx,.txt,.md,.html"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) runFile(f);
+              e.target.value = "";
+            }}
+          />
+
           <label className="inline-flex cursor-pointer items-center gap-2 text-[0.9375rem] text-muted">
             <input
               type="checkbox"
@@ -117,6 +154,14 @@ export default function FitPage() {
           </label>
         </div>
       </div>
+
+      {fileName && (
+        <p className="flex flex-wrap items-center gap-2 text-[0.9375rem] text-muted">
+          <FileText size={14} className="shrink-0 text-faint" />
+          <span className="font-medium">{fileName}</span>
+          <span className="text-faint">· {t("fit.notStored")}</span>
+        </p>
+      )}
 
       {error && (
         <p className="rounded-[var(--radius-panel)] border border-[#C0453B]/30 bg-[#C0453B]/5 px-4 py-3 text-[0.9375rem] text-[#C0453B]">

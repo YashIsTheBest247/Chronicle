@@ -114,6 +114,40 @@ export async function extractFromFile(args: {
   return { text, extraction };
 }
 
+/**
+ * Reads a document to plain text and returns it. Nothing is written anywhere.
+ *
+ * Used for job descriptions, which are somebody else's document: they are
+ * needed for the length of one request and must never enter the user's
+ * Chronicle. Keeping this separate from `extractFromFile` means there is no
+ * code path where a posting could accidentally be stored as a record.
+ */
+export async function extractPlainText(args: {
+  name: string;
+  mime: string;
+  bytes: Buffer;
+}): Promise<string> {
+  const { name, mime, bytes } = args;
+
+  if (NATIVE_MIME.test(mime)) {
+    // PDFs and photos go to Gemini as bytes; ask only for a transcription.
+    const { text } = await generateJSON<{ text: string }>({
+      prompt: `Filename: ${name}
+
+Transcribe this document to plain text. Preserve headings, bullet points and requirement lists. Do not summarise, comment, or omit anything.`,
+      file: { mime, data: bytes },
+      schema: {
+        type: "object",
+        properties: { text: { type: "string" } },
+        required: ["text"],
+      } as unknown as Record<string, unknown>,
+    });
+    return (text ?? "").trim();
+  }
+
+  return (await toText(name, mime, bytes)).trim();
+}
+
 /** Extracts a record from a pasted URL — portfolio, GitHub repo, profile. */
 export async function extractFromUrl(url: string): Promise<ExtractResult> {
   let page = "";
