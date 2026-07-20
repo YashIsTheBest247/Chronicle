@@ -8,7 +8,15 @@ import { requireUser } from "@/lib/session";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const MAX_BYTES = 20 * 1024 * 1024;
+/**
+ * Vercel caps a function's request body at 4.5 MB on every plan, and exceeding
+ * it fails at the platform edge with FUNCTION_PAYLOAD_TOO_LARGE before this
+ * handler ever runs — so the app can only reject it politely by staying under.
+ * Self-hosted deployments (Render, a container) have no such cap and can raise
+ * this with MAX_UPLOAD_MB.
+ */
+const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB ?? 4);
+const MAX_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
 
 export async function POST(req: Request) {
   const session = await requireUser();
@@ -47,7 +55,7 @@ export async function POST(req: Request) {
     }
     if (file.size > MAX_BYTES) {
       return NextResponse.json(
-        { error: `${file.name} is larger than the 20 MB limit.` },
+        { error: `${file.name} is larger than the ${MAX_UPLOAD_MB} MB limit.` },
         { status: 413 },
       );
     }

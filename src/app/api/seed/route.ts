@@ -7,7 +7,10 @@ import { apiError } from "@/lib/api-error";
 import { requireUser } from "@/lib/session";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+// Vercel Hobby caps function duration at 60s; anything higher is rejected or
+// clamped at build time. Seeding stays inside this because the nine records
+// are embedded in one batched call.
+export const maxDuration = 60;
 
 /** Loads the demo journey. Destructive: clears whatever is there first. */
 export async function POST() {

@@ -41,6 +41,25 @@ function connect(): postgres.Sql {
 export async function db(): Promise<postgres.Sql> {
   const sql = connect();
   migration ??= (async () => {
+    // A serverless deployment cold-starts constantly, so re-running the whole
+    // DDL batch every time is both wasteful and risky: multi-statement DDL is
+    // the one thing a transaction pooler handles badly. Check first — the
+    // probe is a single indexed catalog lookup.
+    try {
+      const [ready] = await sql<{ ok: boolean }[]>`
+        select exists (
+          select 1 from information_schema.columns
+          where table_schema = 'public'
+            and table_name = 'items'
+            and column_name = 'user_id'
+        ) as ok
+      `;
+      if (ready?.ok) return;
+    } catch {
+      // Probe failed (no permissions, fresh database) — fall through and let
+      // the real migration produce a meaningful error instead.
+    }
+
     const file = path.join(process.cwd(), "src", "lib", "schema.sql");
     const ddl = fs.readFileSync(file, "utf8");
     try {
