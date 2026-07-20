@@ -230,10 +230,6 @@ export default function RecordPage({
                   {label}
                   {direction === "outgoing" && " →"}
                 </span>
-                <span
-                  className="h-8 w-px shrink-0"
-                  style={{ background: categoryColor(other.category) }}
-                />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[0.9375rem] font-medium">
                     {other.title}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Calendar, FileText, Link2 } from "lucide-react";
 import { CategoryPill } from "./CategoryPill";
-import { categoryColor, cn, formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import type { ClientItem } from "@/lib/types";
 
 export function ItemCard({
@@ -15,24 +15,16 @@ export function ItemCard({
   matchedOn?: string[];
   className?: string;
 }) {
-  const color = categoryColor(item.category);
 
   return (
     <Link
       href={`/record/${item.id}`}
       className={cn(
-        "card pressable group relative flex flex-col gap-3 p-5",
+        "card pressable group flex flex-col gap-3 p-5",
         "hover:-translate-y-1 hover:shadow-[0_14px_38px_-18px_rgb(22_20_15_/_0.28)]",
         className,
       )}
     >
-      {/* Category is also encoded as a left edge, readable at a glance in a grid */}
-      <span
-        className="absolute inset-y-5 left-0 w-[3px] rounded-full opacity-0 transition-opacity group-hover:opacity-100"
-        style={{ background: color }}
-        aria-hidden="true"
-      />
-
       <div className="flex items-start justify-between gap-3">
         <CategoryPill category={item.category} />
         <ArrowUpRight

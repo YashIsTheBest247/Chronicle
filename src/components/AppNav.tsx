@@ -11,6 +11,7 @@ import {
   LayoutGrid,
   Moon,
   Search,
+  Send,
   Sun,
   Upload,
   Waypoints,
@@ -25,6 +26,7 @@ const TABS = [
   { href: "/timeline", key: "nav.timeline", icon: GitBranch },
   { href: "/graph", key: "nav.graph", icon: Waypoints },
   { href: "/search", key: "nav.search", icon: Search },
+  { href: "/settings", key: "nav.telegram", icon: Send },
 ] as const;
 
 /** Same floating pill as the marketing site, carrying the app's own tabs. */

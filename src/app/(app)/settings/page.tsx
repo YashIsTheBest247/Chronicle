@@ -154,9 +154,10 @@ export default function SettingsPage() {
         </div>
       ) : (
         <div className="card space-y-5 p-6">
+          <p className="eyebrow">{t("set.stepsTitle")}</p>
           <ol className="space-y-4">
             <Step n={1}>
-              Open{" "}
+              {t("set.step1a")}{" "}
               {state.botUrl ? (
                 <a
                   href={state.botUrl}
@@ -164,12 +165,12 @@ export default function SettingsPage() {
                   rel="noreferrer"
                   className="font-medium underline underline-offset-4"
                 >
-                  the Chronicle bot
+                  {t("set.step1b")}
                 </a>
               ) : (
-                "the Chronicle bot"
+                t("set.step1b")
               )}{" "}
-              in Telegram and press <b>Start</b>.
+              {t("set.step1c")}
             </Step>
 
             <Step n={2}>
@@ -216,6 +217,24 @@ export default function SettingsPage() {
           )}
         </div>
       )}
+
+      <div className="card p-6">
+        <p className="eyebrow">{t("set.howTitle")}</p>
+        <ul className="mt-4 space-y-3">
+          {(["set.how1", "set.how2", "set.how3", "set.how4"] as const).map(
+            (k, i) => (
+              <li key={k} className="flex gap-3">
+                <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-mist text-[0.8125rem] font-semibold text-graphite">
+                  {i + 1}
+                </span>
+                <span className="text-[0.9375rem] leading-relaxed text-graphite text-pretty">
+                  {t(k)}
+                </span>
+              </li>
+            ),
+          )}
+        </ul>
+      </div>
 
       <div className="card flex flex-wrap items-center gap-4 p-6">
         <div className="min-w-0 flex-1">
