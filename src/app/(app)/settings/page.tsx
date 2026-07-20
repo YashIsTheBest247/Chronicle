@@ -1,7 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check, Copy, Loader2, Send, Unlink } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  Copy,
+  Loader2,
+  Send,
+  Unlink,
+  Zap,
+} from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 
@@ -9,6 +17,10 @@ interface LinkState {
   botConfigured: boolean;
   linked: boolean;
   botUrl: string | null;
+  webhookReady: boolean;
+  webhookUrl: string | null;
+  webhookError: string | null;
+  pendingUpdates: number;
 }
 
 export default function SettingsPage() {
@@ -33,6 +45,20 @@ export default function SettingsPage() {
       const res = await fetch("/api/telegram/link", { method: "POST" });
       const body = await res.json();
       if (res.ok) setCode(body.code);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function activate() {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/telegram/setup", { method: "POST" });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? "Activation failed");
+      await refresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Activation failed");
     } finally {
       setBusy(false);
     }
@@ -74,6 +100,37 @@ export default function SettingsPage() {
             register the webhook once at{" "}
             <code className="font-mono">/api/telegram/setup</code>.
           </p>
+        </div>
+      ) : !state.webhookReady ? (
+        <div className="card space-y-4 p-6">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-[#B07A1E]/12 text-[#B07A1E]">
+              <AlertTriangle size={17} />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[1rem] font-semibold">{t("set.activate")}</p>
+              <p className="mt-1 text-[0.9375rem] leading-relaxed text-muted text-pretty">
+                {t("set.activateBody")}
+              </p>
+              {state.pendingUpdates > 0 && (
+                <p className="mt-2 text-[0.875rem] text-faint">
+                  {state.pendingUpdates} {t("set.pending")}
+                </p>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={activate}
+            disabled={busy}
+            className="btn btn-primary disabled:opacity-50"
+          >
+            {busy ? (
+              <Loader2 size={15} className="animate-spin" />
+            ) : (
+              <Zap size={15} />
+            )}
+            {t("set.activateCta")}
+          </button>
         </div>
       ) : state.linked ? (
         <div className="card flex flex-wrap items-center gap-4 p-6">

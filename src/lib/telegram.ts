@@ -114,6 +114,26 @@ export async function setWebhook(url: string, secret: string) {
   });
 }
 
+export interface WebhookInfo {
+  url: string;
+  pendingUpdates: number;
+  lastError: string | null;
+}
+
+/** What Telegram believes about this bot's webhook. */
+export async function getWebhookInfo(): Promise<WebhookInfo> {
+  const r = await call<{
+    url?: string;
+    pending_update_count?: number;
+    last_error_message?: string;
+  }>("getWebhookInfo", {});
+  return {
+    url: r.url ?? "",
+    pendingUpdates: r.pending_update_count ?? 0,
+    lastError: r.last_error_message ?? null,
+  };
+}
+
 export async function getMe() {
   return call<{ username: string; first_name: string }>("getMe", {});
 }

@@ -230,6 +230,11 @@ export const en = {
   "set.warning":
     "A linked chat can read and download everything in your Chronicle, so only link a chat you control. Disconnecting revokes access immediately.",
   "set.noBot": "No bot is configured on this server.",
+  "set.activate": "The bot is not activated yet",
+  "set.activateBody":
+    "Telegram does not know where to deliver messages for this bot, so it will not reply to anything. Activating registers this deployment as its webhook.",
+  "set.activateCta": "Activate bot",
+  "set.pending": "messages are queued and will arrive once activated",
   "set.language": "Language",
   "set.languageSub": "Applies across the app, and to what the assistant speaks.",
 
@@ -456,6 +461,11 @@ export const hi: Dict = {
   "set.warning":
     "जुड़ा हुआ चैट आपके Chronicle का सब कुछ पढ़ और डाउनलोड कर सकता है, इसलिए केवल अपना चैट जोड़ें। हटाते ही पहुँच तुरंत बंद हो जाती है।",
   "set.noBot": "इस सर्वर पर कोई बॉट सेट नहीं है।",
+  "set.activate": "बॉट अभी चालू नहीं है",
+  "set.activateBody":
+    "Telegram को नहीं पता कि इस बॉट के संदेश कहाँ भेजने हैं, इसलिए वह किसी बात का जवाब नहीं देगा। चालू करने पर यह deployment उसका webhook बन जाएगा।",
+  "set.activateCta": "बॉट चालू करें",
+  "set.pending": "संदेश कतार में हैं और चालू होते ही पहुँच जाएँगे",
   "set.language": "भाषा",
   "set.languageSub": "पूरे ऐप पर लागू होती है, और सहायक की बोली पर भी।",
 
