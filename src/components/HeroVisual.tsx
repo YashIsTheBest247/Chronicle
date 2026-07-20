@@ -20,7 +20,7 @@ export function HeroVisual() {
         <div className="flex items-center gap-2.5 rounded-xl border border-white/12 bg-black/35 px-3.5 py-2.5 backdrop-blur-md">
           <FileText size={14} className="shrink-0 text-white/40" />
           <span className="truncate font-mono text-[0.8125rem] text-white/45 line-through decoration-1">
-            certificate_final_v2.pdf
+            {t("panel.file")}
           </span>
         </div>
 
@@ -38,16 +38,16 @@ export function HeroVisual() {
           <div className="flex items-center justify-between gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[#B07A1E]/45 px-2 py-0.5 text-[0.75rem] font-medium text-white/80">
               <span className="size-1.5 rounded-full bg-[#B07A1E]" />
-              Certifications
+              {t("panel.cert")}
             </span>
-            <span className="text-[0.75rem] text-white/40">Mar 2023</span>
+            <span className="text-[0.75rem] text-white/40">{t("panel.date")}</span>
           </div>
 
           <p className="mt-2.5 text-[1.0625rem] leading-snug font-semibold text-white">
-            Python for Everybody
+            {t("panel.title")}
           </p>
           <p className="mt-0.5 text-[0.8125rem] text-white/45">
-            University of Michigan · Coursera
+            {t("panel.org")}
           </p>
 
           <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -76,8 +76,8 @@ export function HeroVisual() {
           </p>
           <ul className="mt-2 space-y-1.5">
             {[
-              { c: "#2D6BFF", rel: t("panel.appliedIn"), to: "Placement Dashboard" },
-              { c: "#8A6BC8", rel: t("panel.ledTo"), to: "ML Intern · Wooble" },
+              { c: "#2D6BFF", rel: t("panel.appliedIn"), to: t("panel.rec1") },
+              { c: "#8A6BC8", rel: t("panel.ledTo"), to: t("panel.rec2") },
               { c: "#4CAF7D", rel: t("panel.proves"), to: "Python" },
             ].map((r) => (
               <li key={r.to} className="flex items-center gap-2">

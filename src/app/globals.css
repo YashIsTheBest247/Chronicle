@@ -258,12 +258,17 @@
   }
 
   /* Inverted pill button — white on dark surfaces */
+  /* Always sits on a dark surface — the hero photo, the slab — so it uses
+     literal values rather than theme tokens. Deriving it from --c-canvas /
+     --c-fg made it invert with the theme: in dark mode the hover state took
+     --c-linen (which stays light) while the text took --c-fg (also light),
+     rendering the label invisible. */
   .btn-invert {
-    background: rgb(var(--c-canvas));
-    color: rgb(var(--c-fg));
+    background: #edebe7;
+    color: #16140f;
   }
   .btn-invert:hover {
-    background: rgb(var(--c-linen));
+    background: #ffffff;
   }
 
   /* The large dark slab used for section CTAs */

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Check,
@@ -52,6 +52,20 @@ export default function FitPage() {
   const [copied, setCopied] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const resultRef = useRef<HTMLElement>(null);
+
+  // The report renders below a tall textarea, so on most screens it lands
+  // off-frame and the page looks like nothing happened. Bring it up as soon
+  // as it exists.
+  useEffect(() => {
+    if (!fit) return;
+    resultRef.current?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    });
+  }, [fit]);
 
   async function send(init: RequestInit) {
     setBusy(true);
@@ -170,7 +184,7 @@ export default function FitPage() {
       )}
 
       {fit && (
-        <section className="space-y-6">
+        <section ref={resultRef} id="fit-report" className="scroll-mt-28 space-y-6">
           {/* Score */}
           <div className="card flex flex-wrap items-center gap-6 p-6">
             <ScoreRing score={fit.score} />
