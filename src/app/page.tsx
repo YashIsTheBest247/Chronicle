@@ -590,7 +590,7 @@ function Footer() {
           edge, so the page still ends at the bottom bar. */}
       <span
         aria-hidden="true"
-        className="watermark bottom-[-0.22em] z-0"
+        className="watermark bottom-[-0.04em] z-0"
       >
         Chronicle
       </span>

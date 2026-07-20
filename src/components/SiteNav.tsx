@@ -13,6 +13,10 @@ const LINKS = [
   { href: "#modules", key: "nav.what" },
   { href: "#retrieval", key: "nav.retrieval" },
   { href: "/dashboard", key: "nav.dashboard" },
+  // Points at Settings, where the connect steps live. Signed-out visitors get
+  // bounced through /login and land back here, which is the right flow anyway
+  // — linking a chat requires an account.
+  { href: "/settings", key: "nav.telegram" },
 ] as const;
 
 /**
