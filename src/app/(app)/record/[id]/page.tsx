@@ -33,7 +33,7 @@ export default function RecordPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { t } = useT();
+  const { t, lang } = useT();
   const router = useRouter();
   const [data, setData] = useState<{
     item: ClientItem;
@@ -113,7 +113,7 @@ export default function RecordPage({
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.875rem] text-faint">
           <span className="inline-flex items-center gap-1.5">
             <Calendar size={13} />
-            {formatDate(item.date)}
+            {formatDate(item.date, lang)}
             {item.dateConfidence === "approximate" && ` ${t("rec.approx")}`}
           </span>
           {item.organization && (

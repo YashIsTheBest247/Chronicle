@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 };
 
 /** Applied before paint so a dark-mode reload never flashes white. */
-const THEME_BOOT = `(function(){try{var s=localStorage.getItem("chronicle.theme");var d=s==="dark"||(!s&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(d)document.documentElement.classList.add("dark")}catch(e){}})()`;
+// Light by default. Dark is applied only when the user has explicitly chosen
+// it before — the OS preference is deliberately ignored, so a first-time
+// visitor always sees the intended light design rather than a dark auto-guess.
+const THEME_BOOT = `(function(){try{if(localStorage.getItem("chronicle.theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}})()`;
 
 export default function RootLayout({
   children,

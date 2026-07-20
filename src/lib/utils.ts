@@ -11,21 +11,29 @@ export function categoryColor(c: string): string {
 }
 
 /** Renders a partial date the way a person would write it. */
-export function formatDate(date: string | null): string {
-  if (!date) return "Undated";
+const MONTHS: Record<"en" | "hi", string[]> = {
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  hi: ["जन", "फ़र", "मार्च", "अप्रैल", "मई", "जून", "जुल", "अग", "सित", "अक्टू", "नव", "दिस"],
+};
+const UNDATED: Record<"en" | "hi", string> = { en: "Undated", hi: "बिना तारीख़" };
+
+/**
+ * `lang` defaults to English so server callers (Telegram, the fit prompt) stay
+ * unchanged — those produce text for a model or a bot where English is correct.
+ * Client render sites pass the active language.
+ */
+export function formatDate(date: string | null, lang: "en" | "hi" = "en"): string {
+  if (!date) return UNDATED[lang];
   const parts = date.split("-");
-  const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
   if (parts.length === 1) return parts[0];
-  const month = months[Number(parts[1]) - 1] ?? "";
+  const month = MONTHS[lang][Number(parts[1]) - 1] ?? "";
   if (parts.length === 2) return `${month} ${parts[0]}`;
   return `${month} ${Number(parts[2])}, ${parts[0]}`;
 }
 
-export function yearOf(date: string | null): string {
-  return date?.slice(0, 4) || "Undated";
+/** The numeric year, or a localised "Undated" bucket label. */
+export function yearOf(date: string | null, lang: "en" | "hi" = "en"): string {
+  return date?.slice(0, 4) || UNDATED[lang];
 }
 
 export function formatBytes(n: number): string {

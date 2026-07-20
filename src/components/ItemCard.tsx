@@ -5,6 +5,7 @@ import { ArrowUpRight, Calendar, FileText, Link2 } from "lucide-react";
 import { CategoryPill } from "./CategoryPill";
 import { cn, formatDate } from "@/lib/utils";
 import type { ClientItem } from "@/lib/types";
+import { useT } from "@/lib/i18n";
 
 export function ItemCard({
   item,
@@ -15,6 +16,7 @@ export function ItemCard({
   matchedOn?: string[];
   className?: string;
 }) {
+  const { t, lang } = useT();
 
   return (
     <Link
@@ -63,7 +65,7 @@ export function ItemCard({
       <div className="mt-auto flex items-center gap-3 pt-1 text-[0.75rem] text-faint">
         <span className="inline-flex items-center gap-1">
           <Calendar size={11} />
-          {formatDate(item.date)}
+          {formatDate(item.date, lang)}
         </span>
         {item.organization && (
           <span className="truncate">{item.organization}</span>
@@ -72,12 +74,12 @@ export function ItemCard({
           {item.file ? (
             <>
               <FileText size={11} />
-              original
+              {t("card.original")}
             </>
           ) : item.url ? (
             <>
               <Link2 size={11} />
-              link
+              {t("card.link")}
             </>
           ) : null}
         </span>
@@ -85,7 +87,7 @@ export function ItemCard({
 
       {matchedOn && matchedOn.length > 0 && (
         <div className="-mx-5 -mb-5 mt-1 rounded-b-[var(--radius-card)] border-t border-lineSoft bg-linen/60 px-5 py-2 text-[0.75rem] text-faint dark:bg-mist/40">
-          matched on {matchedOn.join(" · ")}
+          {t("card.matchedOn")} {matchedOn.join(" · ")}
         </div>
       )}
     </Link>

@@ -14,7 +14,7 @@ interface Payload {
 }
 
 export default function TimelinePage() {
-  const { t } = useT();
+  const { t, lang } = useT();
   const [data, setData] = useState<Payload | null>(null);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function TimelinePage() {
           <section key={year}>
             <div className="sticky top-28 z-10 -mx-1 mb-4 flex items-center gap-3 bg-canvas/90 px-1 py-1.5 backdrop-blur">
               <h2 className="font-display text-[1.375rem] font-semibold tabular-nums">
-                {year}
+                {year === "Undated" ? t("common.undated") : year}
               </h2>
               <div className="rule-fade flex-1" />
               <span className="text-[0.8125rem] text-faint tabular-nums">
@@ -88,7 +88,7 @@ export default function TimelinePage() {
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[0.8125rem] text-faint tabular-nums">
-                        {formatDate(item.date)}
+                        {formatDate(item.date, lang)}
                       </span>
                       <CategoryPill category={item.category} />
                     </div>

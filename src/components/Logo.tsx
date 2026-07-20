@@ -11,7 +11,13 @@ import { cn } from "@/lib/utils";
  * It reads as an orbit rather than a chart, which keeps it calm at 20px — the
  * size it is actually used at — where anything more literal turns to mush.
  */
-export function LogoMark({ size = 24 }: { size?: number }) {
+export function LogoMark({
+  size = 24,
+  spin = false,
+}: {
+  size?: number;
+  spin?: boolean;
+}) {
   return (
     <svg
       width={size}
@@ -19,7 +25,7 @@ export function LogoMark({ size = 24 }: { size?: number }) {
       viewBox="0 0 32 32"
       fill="none"
       aria-hidden="true"
-      className="shrink-0 overflow-visible"
+      className={cn("shrink-0 overflow-visible", spin && "logo-spin")}
     >
       {/* Outer orbit, opened at the top-left so it reads as a path with a
           beginning rather than a closed circle. */}

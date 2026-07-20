@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Menu, Moon, Search, Sun, X } from "lucide-react";
+import { ArrowUpRight, Menu, Moon, Sun, X } from "lucide-react";
 import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
@@ -13,11 +13,6 @@ const LINKS = [
   { href: "#modules", key: "nav.what" },
   { href: "#retrieval", key: "nav.retrieval" },
   { href: "/explore", key: "nav.explore" },
-  { href: "/dashboard", key: "nav.dashboard" },
-  // Points at Settings, where the connect steps live. Signed-out visitors get
-  // bounced through /login and land back here, which is the right flow anyway
-  // — linking a chat requires an account.
-  { href: "/settings", key: "nav.telegram" },
 ] as const;
 
 /**
@@ -126,22 +121,9 @@ export function SiteNav() {
             <LanguageSwitch onDark={onDark} compact />
 
             <Link
-              href="/search"
-              className={cn(
-                "hidden items-center gap-2 rounded-full border px-4 py-2.5 text-[0.9375rem] font-medium transition-colors md:inline-flex",
-                onDark
-                  ? "border-white/15 text-white/80 hover:bg-white/10"
-                  : "border-line text-muted hover:bg-mist hover:text-fg",
-              )}
-            >
-              <Search size={15} />
-              {t("nav.search")}
-            </Link>
-
-            <Link
               href="/dashboard"
               className={cn(
-                "btn hidden !px-5 !py-2.5 sm:inline-flex",
+                "btn hidden whitespace-nowrap !px-5 !py-2.5 sm:inline-flex",
                 onDark ? "btn-invert" : "btn-primary",
               )}
             >

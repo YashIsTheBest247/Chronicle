@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Sparkles, Upload, Waypoints } from "lucide-react";
+import { Upload, Waypoints } from "lucide-react";
+import { LogoMark } from "@/components/Logo";
 import { CategoryPill } from "@/components/CategoryPill";
 import { ItemCard } from "@/components/ItemCard";
 import { SetupNotice } from "@/components/SetupNotice";
@@ -173,8 +174,8 @@ function EmptyState() {
   const { t } = useT();
   return (
     <div className="mx-auto max-w-lg py-20 text-center">
-      <div className="mx-auto grid size-12 place-items-center rounded-full bg-mist text-faint">
-        <Sparkles size={20} />
+      <div className="mx-auto grid size-14 place-items-center rounded-full bg-mist text-graphite">
+        <LogoMark size={26} spin />
       </div>
       <h1 className="t-page mt-6">{t("dash.emptyTitle")}</h1>
       <p className="mt-3 text-[1rem] leading-relaxed text-muted text-pretty">

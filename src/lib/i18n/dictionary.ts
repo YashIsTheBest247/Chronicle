@@ -308,6 +308,9 @@ export const en = {
   "cat.Other": "Other",
 
   // -- shared --------------------------------------------------------------
+  "card.original": "original",
+  "card.link": "link",
+  "card.matchedOn": "matched on",
   "common.undated": "Undated",
   "common.loading": "Loading…",
   "common.signIn": "Sign in",
@@ -596,6 +599,9 @@ export const hi: Dict = {
   "cat.Academics": "शैक्षणिक",
   "cat.Other": "अन्य",
 
+  "card.original": "मूल",
+  "card.link": "लिंक",
+  "card.matchedOn": "मिलान:",
   "common.undated": "बिना तारीख़",
   "common.loading": "लोड हो रहा है…",
   "common.signIn": "साइन इन करें",

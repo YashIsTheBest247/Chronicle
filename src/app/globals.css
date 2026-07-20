@@ -439,6 +439,16 @@ html.lang-switching body {
   transition: opacity 0.14s ease;
 }
 
+@keyframes logo-spin {
+  to { transform: rotate(360deg); }
+}
+.logo-spin {
+  animation: logo-spin 9s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-spin { animation: none; }
+}
+
 /* ---- chat launcher ------------------------------------------------------ */
 
 /* Two light-blue rings on load, so the assistant announces itself once
