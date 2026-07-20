@@ -178,7 +178,7 @@ src/
   app/
     (app)/          dashboard · timeline · graph · search · upload · fit · settings · record
     api/            ingest · search · chat · fit · items · graph · timeline
-                    file · profile · public · telegram · auth · seed
+                    file · profile · public · telegram · auth
     p/[handle]/     public profile (the only unauthenticated page)
     login/
   lib/

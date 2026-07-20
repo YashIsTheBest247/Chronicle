@@ -166,10 +166,8 @@ export const en = {
   "dash.all": "All",
   "dash.emptyTitle": "Your Chronicle is empty.",
   "dash.emptyBody":
-    "Add a certificate, a project report, or an internship letter and it will organise, categorise, and connect itself. Or load a sample journey to see what a filled-in Chronicle looks like.",
+    "Add a certificate, a project report, or an internship letter, and it will organise, categorise, and connect itself.",
   "dash.addFirst": "Add your first record",
-  "dash.loadDemo": "Load sample journey",
-  "dash.building": "Building sample…",
 
   // -- timeline / graph ----------------------------------------------------
   "time.eyebrow": "Digital journey",
@@ -455,10 +453,8 @@ export const hi: Dict = {
   "dash.all": "सभी",
   "dash.emptyTitle": "आपका Chronicle अभी खाली है।",
   "dash.emptyBody":
-    "कोई प्रमाणपत्र, प्रोजेक्ट रिपोर्ट या इंटर्नशिप पत्र जोड़ें — वह खुद व्यवस्थित और वर्गीकृत हो जाएगा। या नमूना यात्रा लोड करके देखें कि भरा हुआ Chronicle कैसा दिखता है।",
+    "कोई प्रमाणपत्र, प्रोजेक्ट रिपोर्ट या इंटर्नशिप पत्र जोड़ें — वह खुद व्यवस्थित और वर्गीकृत हो जाएगा।",
   "dash.addFirst": "अपना पहला रिकॉर्ड जोड़ें",
-  "dash.loadDemo": "नमूना यात्रा लोड करें",
-  "dash.building": "नमूना बन रहा है…",
 
   "time.eyebrow": "डिजिटल यात्रा",
   "time.title": "आप यहाँ तक कैसे पहुँचे, साल दर साल।",

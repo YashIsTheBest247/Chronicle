@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Loader2, Sparkles, Upload, Waypoints } from "lucide-react";
+import { Sparkles, Upload, Waypoints } from "lucide-react";
 import { CategoryPill } from "@/components/CategoryPill";
 import { ItemCard } from "@/components/ItemCard";
 import { SetupNotice } from "@/components/SetupNotice";
@@ -25,7 +25,6 @@ export default function Dashboard() {
   const [data, setData] = useState<Payload | null>(null);
   const [setupError, setSetupError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string | null>(null);
-  const [seeding, setSeeding] = useState(false);
 
   async function refresh() {
     const res = await fetch("/api/items");
@@ -42,27 +41,11 @@ export default function Dashboard() {
     refresh();
   }, []);
 
-  async function loadDemo() {
-    setSeeding(true);
-    try {
-      const res = await fetch("/api/seed", { method: "POST" });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error ?? "Seeding failed");
-      await refresh();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Seeding failed");
-    } finally {
-      setSeeding(false);
-    }
-  }
-
   if (setupError) return <SetupNotice message={setupError} />;
 
   if (!data) return <DashboardSkeleton />;
 
-  if (data.total === 0) {
-    return <EmptyState onSeed={loadDemo} seeding={seeding} />;
-  }
+  if (data.total === 0) return <EmptyState />;
 
   const visible = filter
     ? data.items.filter((i) => i.category === filter)
@@ -186,44 +169,22 @@ function Stats({ data }: { data: Payload }) {
   );
 }
 
-function EmptyState({
-  onSeed,
-  seeding,
-}: {
-  onSeed: () => void;
-  seeding: boolean;
-}) {
+function EmptyState() {
   const { t } = useT();
   return (
     <div className="mx-auto max-w-lg py-20 text-center">
       <div className="mx-auto grid size-12 place-items-center rounded-full bg-mist text-faint">
         <Sparkles size={20} />
       </div>
-      <h1 className="t-page mt-6">
-        {t("dash.emptyTitle")}
-      </h1>
+      <h1 className="t-page mt-6">{t("dash.emptyTitle")}</h1>
       <p className="mt-3 text-[1rem] leading-relaxed text-muted text-pretty">
         {t("dash.emptyBody")}
       </p>
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+      <div className="mt-8 flex justify-center">
         <Link href="/upload" className="btn btn-primary">
           <Upload size={15} />
           {t("dash.addFirst")}
         </Link>
-        <button
-          onClick={onSeed}
-          disabled={seeding}
-          className="btn btn-ghost disabled:opacity-50"
-        >
-          {seeding ? (
-            <>
-              <Loader2 size={15} className="animate-spin" />
-              {t("dash.building")}
-            </>
-          ) : (
-            t("dash.loadDemo")
-          )}
-        </button>
       </div>
     </div>
   );
