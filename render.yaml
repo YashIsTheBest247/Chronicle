@@ -22,24 +22,37 @@ services:
       - key: NODE_VERSION
         value: "20"
 
-      # --- required -------------------------------------------------------
-      # Postgres with pgvector. Chronicle creates its own tables and the HNSW
-      # index on first request, so there is no migration step to run.
+      # --- required: database + AI ----------------------------------------
+      # Postgres with pgvector (Neon). Chronicle creates its own tables and
+      # the HNSW index on the first signed-in request.
       - key: DATABASE_URL
         sync: false
       # https://aistudio.google.com/apikey
       - key: GEMINI_API_KEY
         sync: false
 
-      # --- optional: Telegram bot ----------------------------------------
-      # Leave blank to disable. The allowlist is required for the bot to
-      # answer anyone: empty means "deny all", never "allow all".
+      # --- required: Google sign-in ---------------------------------------
+      # Records are per-account, so the app cannot run without auth.
+      # Authorised redirect URI in Google Cloud Console must be exactly:
+      #   https://<this-service>.onrender.com/api/auth/callback/google
+      - key: AUTH_GOOGLE_ID
+        sync: false
+      - key: AUTH_GOOGLE_SECRET
+        sync: false
+      # Signs the session cookie. Render generates one; never reuse it across
+      # environments, and changing it signs everybody out.
+      - key: AUTH_SECRET
+        generateValue: true
+
+      # --- optional: Telegram bot -----------------------------------------
+      # Leave blank to disable. Access is per-account: each user links their
+      # own chat from Settings, so there is no allowlist to configure.
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: TELEGRAM_WEBHOOK_SECRET
         generateValue: true
-      - key: TELEGRAM_ALLOWED_CHAT_IDS
-        sync: false
       # Public link behind the landing page's "Chat on Telegram" button.
+      # NEXT_PUBLIC_* is inlined at BUILD time — changing it needs a rebuild,
+      # not just a restart.
       - key: NEXT_PUBLIC_TELEGRAM_URL
         sync: false

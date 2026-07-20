@@ -3,6 +3,7 @@ import { listItems } from "@/lib/store";
 import { toClientItems } from "@/lib/view";
 import { yearOf } from "@/lib/utils";
 import { apiError } from "@/lib/api-error";
+import { requireUser } from "@/lib/session";
 import type { ClientItem } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -10,8 +11,11 @@ export const dynamic = "force-dynamic";
 
 /** Records grouped into years, newest year first, oldest record first within. */
 export async function GET() {
+  const session = await requireUser();
+  if ("response" in session) return session.response;
+
   try {
-    const items = toClientItems(await listItems());
+    const items = toClientItems(await listItems(session.userId));
 
     const byYear = new Map<string, ClientItem[]>();
     for (const item of items) {

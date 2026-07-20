@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { listItems, listRelations } from "@/lib/store";
 import { categoryColor, relationLabel } from "@/lib/utils";
 import { apiError } from "@/lib/api-error";
+import { requireUser } from "@/lib/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,10 +12,13 @@ export const dynamic = "force-dynamic";
  * records that anchor the most of a person's journey read as the largest.
  */
 export async function GET() {
+  const session = await requireUser();
+  if ("response" in session) return session.response;
+
   try {
     const [items, relations] = await Promise.all([
-      listItems(),
-      listRelations(),
+      listItems(session.userId),
+      listRelations(session.userId),
     ]);
 
     const degree = new Map<string, number>();

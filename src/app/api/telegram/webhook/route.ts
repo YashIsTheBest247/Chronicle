@@ -5,16 +5,15 @@ import { search } from "@/lib/search";
 import { getItem, readFileBytes } from "@/lib/store";
 import { formatDate } from "@/lib/utils";
 import {
-  allowlistConfigured,
   answerCallbackQuery,
   esc,
   hasBot,
-  isAllowed,
   sendChatAction,
   sendDocument,
   sendMessage,
   type InlineButton,
 } from "@/lib/telegram";
+import { getUserByTelegramChat, redeemLinkCode } from "@/lib/users";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -87,13 +86,32 @@ async function handleMessage(msg: TgMessage) {
   const text = (msg.text ?? "").trim();
   if (!text) return;
 
-  // Gate first: never reveal whether records exist to an unauthorised chat.
-  if (!isAllowed(chatId)) {
+  // A bare 6-character code links this chat to whoever generated it.
+  const code = text.toUpperCase().replace(/^\/LINK\s+/, "").trim();
+  if (/^[A-Z0-9]{6}$/.test(code)) {
+    const linked = await redeemLinkCode(code, chatId);
     await sendMessage(
       chatId,
-      allowlistConfigured()
-        ? `This Chronicle is private.\n\nYour chat ID is <code>${chatId}</code>. If it is yours, add that ID to <code>TELEGRAM_ALLOWED_CHAT_IDS</code> and redeploy.`
-        : `Chronicle is not linked to a chat yet.\n\nYour chat ID is <code>${chatId}</code>.\n\nSet <code>TELEGRAM_ALLOWED_CHAT_IDS=${chatId}</code> in your environment and redeploy, then message me again.`,
+      linked
+        ? `Linked to <b>${esc(linked.email)}</b>.\n\nAsk me anything about your records — I will send the original files back.`
+        : "That code is wrong or has expired. Generate a new one in Chronicle under Settings.",
+    );
+    return;
+  }
+
+  // Identity is the account this chat is linked to. Without a link there is
+  // no access, and the reply never reveals whether any records exist.
+  const user = await getUserByTelegramChat(chatId);
+  if (!user) {
+    await sendMessage(
+      chatId,
+      [
+        "This chat is not linked to a Chronicle account yet.",
+        "",
+        "1. Sign in to Chronicle with Google",
+        "2. Open <b>Settings</b> and copy your 6-character code",
+        "3. Send that code here",
+      ].join("\n"),
     );
     return;
   }
@@ -137,7 +155,7 @@ async function handleMessage(msg: TgMessage) {
 
   await sendChatAction(chatId, "typing");
 
-  const result = await search(text, MAX_RESULTS);
+  const result = await search(user.id, text, MAX_RESULTS);
 
   if (result.hits.length === 0) {
     await sendMessage(chatId, `No records matched “${esc(text)}”.`);
@@ -177,7 +195,7 @@ async function handleMessage(msg: TgMessage) {
   // 3 — push the top match's file straight away, so the common case is
   //     "ask, receive" with no extra tap.
   for (const hit of withFiles.slice(0, AUTO_SEND_FILES)) {
-    await deliver(chatId, hit.item.id);
+    await deliver(user.id, chatId, hit.item.id);
   }
 }
 
@@ -185,8 +203,9 @@ async function handleCallback(cb: NonNullable<TgUpdate["callback_query"]>) {
   const chatId = cb.message?.chat.id;
   if (!chatId) return;
 
-  if (!isAllowed(chatId)) {
-    await answerCallbackQuery(cb.id, "Not authorised.");
+  const user = await getUserByTelegramChat(chatId);
+  if (!user) {
+    await answerCallbackQuery(cb.id, "This chat is not linked to an account.");
     return;
   }
 
@@ -197,12 +216,13 @@ async function handleCallback(cb: NonNullable<TgUpdate["callback_query"]>) {
   }
 
   await answerCallbackQuery(cb.id, "Sending…");
-  await deliver(chatId, data.slice(2));
+  await deliver(user.id, chatId, data.slice(2));
 }
 
 /** Sends one record's original file, preserving its filename and type. */
-async function deliver(chatId: number, itemId: string) {
-  const item = await getItem(itemId);
+async function deliver(userId: string, chatId: number, itemId: string) {
+  // Scoped by owner: a guessed id from another account resolves to nothing.
+  const item = await getItem(userId, itemId);
   if (!item) {
     await sendMessage(chatId, "That record no longer exists.");
     return;
@@ -219,7 +239,7 @@ async function deliver(chatId: number, itemId: string) {
 
   await sendChatAction(chatId, "upload_document");
 
-  const stored = await readFileBytes(item.file.id);
+  const stored = await readFileBytes(userId, item.file.id);
   if (!stored) {
     await sendMessage(chatId, "That file is missing from storage.");
     return;

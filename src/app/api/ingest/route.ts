@@ -3,6 +3,7 @@ import { ingestFile, ingestUrl } from "@/lib/ingest";
 import { hasKey } from "@/lib/gemini";
 import { hasDatabase } from "@/lib/db";
 import { apiError } from "@/lib/api-error";
+import { requireUser } from "@/lib/session";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -10,6 +11,10 @@ export const maxDuration = 60;
 const MAX_BYTES = 20 * 1024 * 1024;
 
 export async function POST(req: Request) {
+  const session = await requireUser();
+  if ("response" in session) return session.response;
+  const { userId } = session;
+
   if (!hasDatabase() || !hasKey()) {
     return NextResponse.json(
       {
@@ -31,7 +36,7 @@ export async function POST(req: Request) {
           { status: 400 },
         );
       }
-      const result = await ingestUrl(url);
+      const result = await ingestUrl(userId, url);
       return NextResponse.json(result);
     }
 
@@ -48,7 +53,7 @@ export async function POST(req: Request) {
     }
 
     const bytes = Buffer.from(await file.arrayBuffer());
-    const result = await ingestFile({
+    const result = await ingestFile(userId, {
       name: file.name,
       mime: file.type || "application/octet-stream",
       bytes,

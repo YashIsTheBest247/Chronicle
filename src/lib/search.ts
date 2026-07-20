@@ -65,12 +65,13 @@ export interface SearchResult extends Omit<SearchResponse, "hits"> {
 }
 
 export async function search(
+  userId: string,
   query: string,
   limit = 12,
 ): Promise<SearchResult> {
   const trimmed = query.trim();
 
-  if ((await countItems()) === 0) {
+  if ((await countItems(userId)) === 0) {
     return {
       query: trimmed,
       intent: emptyIntent(),
@@ -88,7 +89,7 @@ export async function search(
     const [queryVec] = await embed([semantic], "RETRIEVAL_QUERY");
     // Over-fetch: the lexical and filter boosts below reorder these, so the
     // final top-N should be chosen from a wider pool than N.
-    candidates = await searchByVector(queryVec, Math.max(limit * 3, 30), {
+    candidates = await searchByVector(userId, queryVec, Math.max(limit * 3, 30), {
       categories: intent.categories,
       organizations: intent.organizations,
       dateFrom: intent.dateFrom || undefined,
@@ -100,7 +101,7 @@ export async function search(
 
   // A filter combination that matches nothing is worse than no filter at all.
   if (candidates.length === 0) {
-    const all = await listItems();
+    const all = await listItems(userId);
     candidates = all.map((item) => ({ item, similarity: 0 }));
   }
 

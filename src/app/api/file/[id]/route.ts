@@ -1,4 +1,5 @@
 import { readFileBytes } from "@/lib/store";
+import { auth } from "@/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,9 +14,15 @@ export async function GET(
 ) {
   const { id } = await params;
 
+  // Files are the most sensitive thing Chronicle holds, so ownership is
+  // checked in the query itself: a wrong owner gets 404, not the bytes.
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return new Response("Sign in to download files.", { status: 401 });
+
   let stored: Awaited<ReturnType<typeof readFileBytes>>;
   try {
-    stored = await readFileBytes(id);
+    stored = await readFileBytes(userId, id);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Storage unavailable";
     return new Response(message, { status: 503 });

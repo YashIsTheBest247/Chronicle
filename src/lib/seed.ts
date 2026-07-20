@@ -193,8 +193,8 @@ const RECORDS: Extraction[] = [
   },
 ];
 
-export async function seed(): Promise<number> {
-  await reset();
+export async function seed(userId: string): Promise<number> {
+  await reset(userId);
 
   const vectors = await embed(RECORDS.map(embeddingText));
   const now = Date.now();
@@ -210,14 +210,14 @@ export async function seed(): Promise<number> {
     createdAt: new Date(now - (RECORDS.length - i) * 60_000).toISOString(),
   }));
 
-  await addItems(items);
+  await addItems(userId, items);
 
   // Relate only after the whole batch is in, so every record can see every
   // other one and the graph doesn't depend on insertion order.
-  const stored = await listItemsWithEmbeddings();
+  const stored = await listItemsWithEmbeddings(userId);
   for (const item of stored) {
-    const candidates = await relationCandidates(item);
-    await replaceRelationsFor(item.id, await relateItem(item, candidates));
+    const candidates = await relationCandidates(userId, item);
+    await replaceRelationsFor(userId, item.id, await relateItem(item, candidates));
   }
 
   return items.length;

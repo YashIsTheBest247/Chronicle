@@ -119,22 +119,7 @@ export async function getMe() {
 }
 
 /**
- * Who is allowed to query this Chronicle.
- *
- * Chronicle has no accounts — one deployment holds one person's records — so
- * an open bot would hand a stranger's certificates to anyone who found it.
- * An unset allowlist therefore denies everyone rather than allowing everyone.
+ * Telegram access is per-account, resolved from `users.telegram_chat_id`
+ * rather than an environment allowlist — see lib/users.ts. An unlinked chat
+ * has no owner, and therefore no records to read.
  */
-export function isAllowed(chatId: number): boolean {
-  const raw = process.env.TELEGRAM_ALLOWED_CHAT_IDS?.trim();
-  if (!raw) return false;
-  return raw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .includes(String(chatId));
-}
-
-export function allowlistConfigured(): boolean {
-  return Boolean(process.env.TELEGRAM_ALLOWED_CHAT_IDS?.trim());
-}

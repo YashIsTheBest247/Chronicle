@@ -23,23 +23,25 @@ export interface IngestResult {
   relations: Relation[];
 }
 
-export async function ingestFile(args: {
-  name: string;
-  mime: string;
-  bytes: Buffer;
-}): Promise<IngestResult> {
+export async function ingestFile(
+  userId: string,
+  args: { name: string; mime: string; bytes: Buffer },
+): Promise<IngestResult> {
   const fileId = nanoid(12);
   const { text, extraction } = await extractFromFile(args);
-  const file = await saveFile(fileId, args.name, args.mime, args.bytes);
-  return finish({ extraction, text, fileId: file.id, url: null });
+  const file = await saveFile(userId, fileId, args.name, args.mime, args.bytes);
+  return finish(userId, { extraction, text, fileId: file.id, url: null });
 }
 
-export async function ingestUrl(url: string): Promise<IngestResult> {
+export async function ingestUrl(
+  userId: string,
+  url: string,
+): Promise<IngestResult> {
   const { text, extraction } = await extractFromUrl(url);
-  return finish({ extraction, text, fileId: null, url });
+  return finish(userId, { extraction, text, fileId: null, url });
 }
 
-async function finish(args: {
+async function finish(userId: string, args: {
   extraction: Awaited<ReturnType<typeof extractFromFile>>["extraction"];
   text: string;
   fileId: string | null;
@@ -58,23 +60,25 @@ async function finish(args: {
     createdAt: new Date().toISOString(),
   };
 
-  await addItem(item);
+  await addItem(userId, item);
 
-  const candidates = await relationCandidates(item);
+  // Candidates are drawn only from this account, so relationships can never
+  // form across users.
+  const candidates = await relationCandidates(userId, item);
   const relations = await relateItem(item, candidates);
-  await replaceRelationsFor(item.id, relations);
+  await replaceRelationsFor(userId, item.id, relations);
 
   return { item, relations };
 }
 
 /** Recomputes every edge in the graph — used after a bulk import or reset. */
-export async function rebuildRelations(): Promise<number> {
-  const items = await listItems();
+export async function rebuildRelations(userId: string): Promise<number> {
+  const items = await listItems(userId);
   let total = 0;
   for (const row of items) {
-    const candidates = await relationCandidates(row);
+    const candidates = await relationCandidates(userId, row);
     const relations = await relateItem(row, candidates);
-    await replaceRelationsFor(row.id, relations);
+    await replaceRelationsFor(userId, row.id, relations);
     total += relations.length;
   }
   return total;

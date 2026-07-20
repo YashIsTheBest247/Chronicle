@@ -9,11 +9,16 @@ import {
 import { toClientItems } from "@/lib/view";
 import { CATEGORIES, type Category } from "@/lib/types";
 import { apiError } from "@/lib/api-error";
+import { requireUser } from "@/lib/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  const session = await requireUser();
+  if ("response" in session) return session.response;
+  const { userId } = session;
+
   try {
     const { searchParams } = new URL(req.url);
     const raw = searchParams.get("category");
@@ -22,11 +27,11 @@ export async function GET(req: Request) {
       : undefined;
 
     const [rows, counts, total, relations, skills] = await Promise.all([
-      listItems(category),
-      categoryCounts(),
-      countItems(),
-      countRelations(),
-      skillFrequency(),
+      listItems(userId, category),
+      categoryCounts(userId),
+      countItems(userId),
+      countRelations(userId),
+      skillFrequency(userId),
     ]);
 
     return NextResponse.json({

@@ -18,6 +18,7 @@
     "mammoth": "^1.9.0",
     "nanoid": "^5.0.9",
     "next": "15.1.6",
+    "next-auth": "^5.0.0-beta.31",
     "postgres": "^3.4.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

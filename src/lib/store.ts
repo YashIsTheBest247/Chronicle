@@ -13,6 +13,11 @@ import type {
  * Every read and write in Chronicle goes through this module. Ranking that
  * can be expressed in SQL is expressed in SQL — the vector search below is a
  * pgvector index scan, not a full table load with cosine in JavaScript.
+ *
+ * MULTI-TENANCY: every function takes `userId` as its first argument and
+ * every statement filters on it. There is deliberately no unscoped read —
+ * a caller cannot accidentally fetch another account's records because no
+ * such function exists.
  */
 
 type Row = Record<string, unknown>;
@@ -74,13 +79,17 @@ function itemColumns(sql: postgres.Sql) {
 
 // ------------------------------------------------------------------ reads --
 
-export async function listItems(category?: Category): Promise<ItemWithFile[]> {
+export async function listItems(
+  userId: string,
+  category?: Category,
+): Promise<ItemWithFile[]> {
   const sql = await db();
   const rows = await sql<Row[]>`
     select ${itemColumns(sql)}
     from items i
     left join files f on f.id = i.file_id
-    ${category ? sql`where i.category = ${category}` : sql``}
+    where i.user_id = ${userId}
+    ${category ? sql`and i.category = ${category}` : sql``}
     order by i.date desc nulls last, i.created_at desc
   `;
   return rows.map(toItemWithFile);
@@ -115,57 +124,68 @@ function itemColumnsWithVector(sql: postgres.Sql) {
  * Items including their vectors. Only the relationship engine needs these —
  * every UI read path uses `listItems()` and leaves the embeddings in Postgres.
  */
-export async function listItemsWithEmbeddings(): Promise<Item[]> {
+export async function listItemsWithEmbeddings(userId: string): Promise<Item[]> {
   const sql = await db();
   const rows = await sql<Row[]>`
-    select ${itemColumnsWithVector(sql)} from items order by created_at asc
+    select ${itemColumnsWithVector(sql)} from items
+    where user_id = ${userId}
+    order by created_at asc
   `;
   return rows.map(toItem);
 }
 
-export async function getItem(id: string): Promise<ItemWithFile | null> {
+export async function getItem(
+  userId: string,
+  id: string,
+): Promise<ItemWithFile | null> {
   const sql = await db();
   const [row] = await sql<Row[]>`
     select ${itemColumns(sql)}
     from items i
     left join files f on f.id = i.file_id
-    where i.id = ${id}
+    where i.id = ${id} and i.user_id = ${userId}
   `;
   return row ? toItemWithFile(row) : null;
 }
 
-export async function countItems(): Promise<number> {
+export async function countItems(userId: string): Promise<number> {
   const sql = await db();
-  const [row] = await sql<Row[]>`select count(*)::int as n from items`;
+  const [row] = await sql<Row[]>`
+    select count(*)::int as n from items where user_id = ${userId}
+  `;
   return Number(row.n);
 }
 
 /** Per-category totals, including the categories sitting at zero. */
-export async function categoryCounts(): Promise<Record<string, number>> {
+export async function categoryCounts(
+  userId: string,
+): Promise<Record<string, number>> {
   const sql = await db();
   const rows = await sql<Row[]>`
-    select category, count(*)::int as n from items group by category
+    select category, count(*)::int as n from items
+    where user_id = ${userId} group by category
   `;
   return Object.fromEntries(rows.map((r) => [r.category as string, Number(r.n)]));
 }
 
 /** Skill frequency across the whole Chronicle, computed in the database. */
-export async function skillFrequency(): Promise<
-  { name: string; count: number }[]
-> {
+export async function skillFrequency(
+  userId: string,
+): Promise<{ name: string; count: number }[]> {
   const sql = await db();
   const rows = await sql<Row[]>`
     select skill as name, count(*)::int as n
     from items, unnest(skills) as skill
+    where user_id = ${userId}
     group by skill
     order by n desc, skill asc
   `;
   return rows.map((r) => ({ name: r.name as string, count: Number(r.n) }));
 }
 
-export async function listRelations(): Promise<Relation[]> {
+export async function listRelations(userId: string): Promise<Relation[]> {
   const sql = await db();
-  const rows = await sql<Row[]>`select * from relations`;
+  const rows = await sql<Row[]>`select * from relations where user_id = ${userId}`;
   return rows.map((r) => ({
     id: r.id as string,
     from: r.from_id as string,
@@ -176,14 +196,19 @@ export async function listRelations(): Promise<Relation[]> {
   }));
 }
 
-export async function countRelations(): Promise<number> {
+export async function countRelations(userId: string): Promise<number> {
   const sql = await db();
-  const [row] = await sql<Row[]>`select count(*)::int as n from relations`;
+  const [row] = await sql<Row[]>`
+    select count(*)::int as n from relations where user_id = ${userId}
+  `;
   return Number(row.n);
 }
 
 /** Every edge touching `id`, joined to the record on the other end. */
-export async function getConnections(id: string): Promise<
+export async function getConnections(
+  userId: string,
+  id: string,
+): Promise<
   {
     relation: Relation;
     direction: "outgoing" | "incoming";
@@ -200,7 +225,9 @@ export async function getConnections(id: string): Promise<
     join items i
       on i.id = case when r.from_id = ${id} then r.to_id else r.from_id end
     left join files f on f.id = i.file_id
-    where r.from_id = ${id} or r.to_id = ${id}
+    where r.user_id = ${userId}
+      and i.user_id = ${userId}
+      and (r.from_id = ${id} or r.to_id = ${id})
     order by r.weight desc
   `;
   return rows.map((r) => ({
@@ -232,6 +259,7 @@ export interface VectorFilters {
  * lets Postgres narrow before ranking rather than after.
  */
 export async function searchByVector(
+  userId: string,
   vector: number[],
   limit: number,
   filters: VectorFilters = {},
@@ -246,7 +274,8 @@ export async function searchByVector(
            1 - (i.embedding <=> ${toVector(vector)}::vector) as similarity
     from items i
     left join files f on f.id = i.file_id
-    where i.embedding is not null
+    where i.user_id = ${userId}
+      and i.embedding is not null
       ${categories.length ? sql`and i.category = any(${categories}::text[])` : sql``}
       ${
         organizations.length
@@ -270,6 +299,7 @@ export async function searchByVector(
  * This replaces loading the entire table to compare in memory.
  */
 export async function relationCandidates(
+  userId: string,
   item: Item,
   vectorLimit = 14,
 ): Promise<Item[]> {
@@ -277,7 +307,8 @@ export async function relationCandidates(
   const rows = await sql<Row[]>`
     with overlapping as (
       select ${itemColumnsWithVector(sql)} from items
-      where id <> ${item.id}
+      where user_id = ${userId}
+        and id <> ${item.id}
         and (
           -- Empty arrays need the cast; Postgres cannot infer '{}' as text[].
           skills && ${item.skills}::text[]
@@ -286,7 +317,8 @@ export async function relationCandidates(
     ),
     nearest as (
       select ${itemColumnsWithVector(sql)} from items
-      where id <> ${item.id}
+      where user_id = ${userId}
+        and id <> ${item.id}
         and embedding is not null
       order by embedding <=> ${toVector(item.embedding)}::vector
       limit ${vectorLimit}
@@ -301,6 +333,7 @@ export async function relationCandidates(
 // ----------------------------------------------------------------- writes --
 
 export async function saveFile(
+  userId: string,
   id: string,
   name: string,
   mime: string,
@@ -308,8 +341,8 @@ export async function saveFile(
 ): Promise<SourceFile> {
   const sql = await db();
   const [row] = await sql<Row[]>`
-    insert into files (id, name, mime, size, bytes)
-    values (${id}, ${name}, ${mime}, ${bytes.byteLength}, ${bytes})
+    insert into files (id, user_id, name, mime, size, bytes)
+    values (${id}, ${userId}, ${name}, ${mime}, ${bytes.byteLength}, ${bytes})
     returning id, name, mime, size, uploaded_at
   `;
   return {
@@ -323,11 +356,13 @@ export async function saveFile(
 
 /** Streams the original bytes back out, exactly as they went in. */
 export async function readFileBytes(
+  userId: string,
   id: string,
 ): Promise<{ file: SourceFile; bytes: Buffer } | null> {
   const sql = await db();
   const [row] = await sql<Row[]>`
-    select id, name, mime, size, bytes, uploaded_at from files where id = ${id}
+    select id, name, mime, size, bytes, uploaded_at
+    from files where id = ${id} and user_id = ${userId}
   `;
   if (!row) return null;
   return {
@@ -342,15 +377,15 @@ export async function readFileBytes(
   };
 }
 
-export async function addItem(item: Item): Promise<void> {
+export async function addItem(userId: string, item: Item): Promise<void> {
   const sql = await db();
   await sql`
     insert into items (
-      id, file_id, url, title, summary, category, date, date_confidence,
-      organization, skills, tags, people, links, highlights, content,
-      embedding, created_at
+      id, user_id, file_id, url, title, summary, category, date,
+      date_confidence, organization, skills, tags, people, links, highlights,
+      content, embedding, created_at
     ) values (
-      ${item.id}, ${item.fileId}, ${item.url}, ${item.title}, ${item.summary},
+      ${item.id}, ${userId}, ${item.fileId}, ${item.url}, ${item.title}, ${item.summary},
       ${item.category}, ${item.date}, ${item.dateConfidence},
       ${item.organization}, ${item.skills}, ${item.tags}, ${item.people},
       ${item.links}, ${item.highlights}, ${item.text},
@@ -359,7 +394,7 @@ export async function addItem(item: Item): Promise<void> {
   `;
 }
 
-export async function addItems(items: Item[]): Promise<void> {
+export async function addItems(userId: string, items: Item[]): Promise<void> {
   // Sequential inside one transaction: the batch is small and this keeps the
   // insert statement identical to the single-item path.
   const sql = await db();
@@ -367,11 +402,11 @@ export async function addItems(items: Item[]): Promise<void> {
     for (const item of items) {
       await tx`
         insert into items (
-          id, file_id, url, title, summary, category, date, date_confidence,
-          organization, skills, tags, people, links, highlights, content,
-          embedding, created_at
+          id, user_id, file_id, url, title, summary, category, date,
+          date_confidence, organization, skills, tags, people, links,
+          highlights, content, embedding, created_at
         ) values (
-          ${item.id}, ${item.fileId}, ${item.url}, ${item.title},
+          ${item.id}, ${userId}, ${item.fileId}, ${item.url}, ${item.title},
           ${item.summary}, ${item.category}, ${item.date},
           ${item.dateConfidence}, ${item.organization}, ${item.skills},
           ${item.tags}, ${item.people}, ${item.links}, ${item.highlights},
@@ -384,16 +419,20 @@ export async function addItems(items: Item[]): Promise<void> {
 
 /** Swaps in a freshly computed edge set for one item, atomically. */
 export async function replaceRelationsFor(
+  userId: string,
   id: string,
   relations: Relation[],
 ): Promise<void> {
   const sql = await db();
   await sql.begin(async (tx) => {
-    await tx`delete from relations where from_id = ${id} or to_id = ${id}`;
+    await tx`
+      delete from relations
+      where user_id = ${userId} and (from_id = ${id} or to_id = ${id})
+    `;
     for (const r of relations) {
       await tx`
-        insert into relations (id, from_id, to_id, kind, weight, reason)
-        values (${r.id}, ${r.from}, ${r.to}, ${r.kind}, ${r.weight}, ${r.reason})
+        insert into relations (id, user_id, from_id, to_id, kind, weight, reason)
+        values (${r.id}, ${userId}, ${r.from}, ${r.to}, ${r.kind}, ${r.weight}, ${r.reason})
         on conflict (from_id, to_id) do update
           set kind = excluded.kind,
               weight = excluded.weight,
@@ -403,18 +442,30 @@ export async function replaceRelationsFor(
   });
 }
 
-export async function deleteItem(id: string): Promise<void> {
+export async function deleteItem(userId: string, id: string): Promise<void> {
   const sql = await db();
   await sql.begin(async (tx) => {
-    const [row] = await tx<Row[]>`select file_id from items where id = ${id}`;
-    const fileId = (row?.file_id as string | null) ?? null;
+    // The ownership check lives in the WHERE clause, so a mismatched user
+    // deletes nothing rather than deleting someone else's record.
+    const [row] = await tx<Row[]>`
+      select file_id from items where id = ${id} and user_id = ${userId}
+    `;
+    if (!row) return;
+    const fileId = (row.file_id as string | null) ?? null;
     // Relations cascade on the foreign key; the file needs an explicit delete.
-    await tx`delete from items where id = ${id}`;
-    if (fileId) await tx`delete from files where id = ${fileId}`;
+    await tx`delete from items where id = ${id} and user_id = ${userId}`;
+    if (fileId) {
+      await tx`delete from files where id = ${fileId} and user_id = ${userId}`;
+    }
   });
 }
 
-export async function reset(): Promise<void> {
+/** Clears one account's Chronicle. Never truncates — other tenants remain. */
+export async function reset(userId: string): Promise<void> {
   const sql = await db();
-  await sql`truncate relations, items, files restart identity cascade`;
+  await sql.begin(async (tx) => {
+    await tx`delete from relations where user_id = ${userId}`;
+    await tx`delete from items where user_id = ${userId}`;
+    await tx`delete from files where user_id = ${userId}`;
+  });
 }

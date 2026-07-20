@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import {
   GitBranch,
+  LogOut,
+  Settings,
   LayoutGrid,
   Moon,
   Search,
@@ -25,7 +28,9 @@ const TABS = [
 /** Same floating pill as the marketing site, carrying the app's own tabs. */
 export function AppNav() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [dark, setDark] = useState(false);
+  const [menu, setMenu] = useState(false);
 
   useEffect(() => {
     setDark(document.documentElement.classList.contains("dark"));
@@ -81,6 +86,64 @@ export function AppNav() {
               <Upload size={14} />
               Add
             </Link>
+
+            {/* Account menu — also the only place to sign out. */}
+            <div className="relative">
+              <button
+                onClick={() => setMenu((v) => !v)}
+                aria-label="Account"
+                className="grid size-10 place-items-center overflow-hidden rounded-full border border-line text-muted transition-colors hover:bg-mist"
+              >
+                {session?.user?.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={session.user.image}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <span className="text-[0.875rem] font-semibold">
+                    {(session?.user?.name ?? "?").slice(0, 1).toUpperCase()}
+                  </span>
+                )}
+              </button>
+
+              {menu && (
+                <>
+                  <button
+                    aria-hidden="true"
+                    tabIndex={-1}
+                    onClick={() => setMenu(false)}
+                    className="fixed inset-0 z-10 cursor-default"
+                  />
+                  <div className="card absolute right-0 z-20 mt-2 w-60 p-2">
+                    <div className="border-b border-lineSoft px-3 py-2">
+                      <p className="truncate text-[0.875rem] font-medium">
+                        {session?.user?.name ?? "Signed in"}
+                      </p>
+                      <p className="truncate text-[0.8125rem] text-faint">
+                        {session?.user?.email}
+                      </p>
+                    </div>
+                    <Link
+                      href="/settings"
+                      onClick={() => setMenu(false)}
+                      className="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-[0.9375rem] text-muted hover:bg-mist hover:text-fg"
+                    >
+                      <Settings size={15} />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={() => signOut({ redirectTo: "/" })}
+                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-[0.9375rem] text-muted hover:bg-mist hover:text-fg"
+                    >
+                      <LogOut size={15} />
+                      Sign out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
