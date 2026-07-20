@@ -4,21 +4,16 @@ import { useState } from "react";
 import { Loader2, Search as SearchIcon, Sparkles } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
 import type { ClientItem, SearchResponse } from "@/lib/types";
+import { useT } from "@/lib/i18n";
 
 type Result = Omit<SearchResponse, "hits"> & {
   hits: { item: ClientItem; score: number; matchedOn: string[] }[];
 };
 
-const EXAMPLES = [
-  "Show all my certificates",
-  "Show my AI projects",
-  "Show internship documents",
-  "Show my latest resume",
-  "What proves I know Python?",
-  "Everything from 2024",
-];
+
 
 export default function SearchPage() {
+  const { t } = useT();
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
@@ -62,9 +57,9 @@ export default function SearchPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <header className="text-center">
-        <p className="eyebrow">Retrieval</p>
+        <p className="eyebrow">{t("search.eyebrow")}</p>
         <h1 className="t-page mt-2 text-balance">
-          Ask for anything you&apos;ve ever done.
+          {t("search.title")}
         </h1>
       </header>
 
@@ -79,7 +74,7 @@ export default function SearchPage() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="show me everything that proves I know machine learning"
+          placeholder={t("search.placeholder")}
           autoFocus
           className="w-full bg-transparent text-[1rem] outline-none placeholder:text-faint"
         />
@@ -90,7 +85,7 @@ export default function SearchPage() {
 
       {!result && !loading && (
         <div className="flex flex-wrap justify-center gap-2">
-          {EXAMPLES.map((ex) => (
+          {([ "search.ex1","search.ex2","search.ex3","search.ex4","search.ex5","search.ex6" ] as const).map((k) => t(k)).map((ex) => (
             <button
               key={ex}
               onClick={() => void run(ex)}
@@ -121,7 +116,7 @@ export default function SearchPage() {
             {filters.length > 0 && (
               <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-lineSoft pt-3">
                 <span className="text-[0.75rem] tracking-wide text-faint uppercase">
-                  Understood as
+                  {t("search.understood")}
                 </span>
                 {filters.map((f) => (
                   <span key={String(f)} className="pill text-muted">
@@ -144,7 +139,7 @@ export default function SearchPage() {
             </div>
           ) : (
             <p className="py-10 text-center text-[1rem] text-faint">
-              Nothing matched that query.
+              {t("search.none")}
             </p>
           )}
         </section>

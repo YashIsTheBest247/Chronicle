@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Check, Copy, Loader2, Send, Unlink } from "lucide-react";
+import { useT } from "@/lib/i18n";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
 
 interface LinkState {
   botConfigured: boolean;
@@ -10,6 +12,7 @@ interface LinkState {
 }
 
 export default function SettingsPage() {
+  const { t } = useT();
   const [state, setState] = useState<LinkState | null>(null);
   const [code, setCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -49,11 +52,10 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <header>
-        <p className="eyebrow">Settings</p>
-        <h1 className="t-page mt-2">Connect Telegram</h1>
+        <p className="eyebrow">{t("set.eyebrow")}</p>
+        <h1 className="t-page mt-2">{t("set.title")}</h1>
         <p className="mt-3 text-[1rem] leading-relaxed text-muted text-pretty">
-          Ask for any record from your phone and get the original file back as a
-          download — without opening Chronicle.
+          {t("set.sub")}
         </p>
       </header>
 
@@ -64,7 +66,7 @@ export default function SettingsPage() {
       ) : !state.botConfigured ? (
         <div className="card p-6">
           <p className="text-[0.9375rem] font-medium">
-            No bot is configured on this server.
+            {t("set.noBot")}
           </p>
           <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted text-pretty">
             Set <code className="font-mono">TELEGRAM_BOT_TOKEN</code> and{" "}
@@ -79,9 +81,9 @@ export default function SettingsPage() {
             <Check size={18} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[1rem] font-semibold">Telegram connected</p>
+            <p className="text-[1rem] font-semibold">{t("set.connected")}</p>
             <p className="mt-0.5 text-[0.9375rem] text-muted">
-              Message the bot and ask for anything in your Chronicle.
+              {t("set.connectedSub")}
             </p>
           </div>
           <button
@@ -90,7 +92,7 @@ export default function SettingsPage() {
             className="btn btn-ghost !py-2.5 disabled:opacity-50"
           >
             <Unlink size={14} />
-            Disconnect
+            {t("set.disconnect")}
           </button>
         </div>
       ) : (
@@ -114,8 +116,7 @@ export default function SettingsPage() {
             </Step>
 
             <Step n={2}>
-              Generate a code and send it to the bot as a message. It expires in
-              15 minutes and works once.
+              {t("set.step2")}
             </Step>
           </ol>
 
@@ -133,13 +134,13 @@ export default function SettingsPage() {
                 className="btn btn-ghost ml-auto !py-2.5"
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
-                {copied ? "Copied" : "Copy"}
+                {copied ? t("set.copied") : t("set.copy")}
               </button>
               <button
                 onClick={refresh}
                 className="btn btn-primary !py-2.5"
               >
-                I&apos;ve sent it
+                {t("set.sent")}
               </button>
             </div>
           ) : (
@@ -153,15 +154,24 @@ export default function SettingsPage() {
               ) : (
                 <Send size={15} />
               )}
-              Generate linking code
+              {t("set.generate")}
             </button>
           )}
         </div>
       )}
 
+      <div className="card flex flex-wrap items-center gap-4 p-6">
+        <div className="min-w-0 flex-1">
+          <p className="text-[1rem] font-semibold">{t("set.language")}</p>
+          <p className="mt-0.5 text-[0.9375rem] text-muted">
+            {t("set.languageSub")}
+          </p>
+        </div>
+        <LanguageSwitch />
+      </div>
+
       <p className="text-[0.9375rem] leading-relaxed text-faint text-pretty">
-        A linked chat can read and download everything in your Chronicle, so
-        only link a chat you control. Disconnecting revokes access immediately.
+        {t("set.warning")}
       </p>
     </div>
   );

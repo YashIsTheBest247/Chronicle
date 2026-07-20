@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -17,6 +19,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { HeroVisual } from "@/components/HeroVisual";
 import { Reveal } from "@/components/Reveal";
 import { TelegramButton } from "@/components/TelegramButton";
+import { useT } from "@/lib/i18n";
 
 export default function Landing() {
   return (
@@ -36,6 +39,7 @@ export default function Landing() {
 /* ------------------------------------------------------------------ hero -- */
 
 function Hero() {
+  const { t } = useT();
   return (
     <section
       id="hero"
@@ -84,20 +88,19 @@ function Hero() {
           <div className="min-w-0">
             {/* Breaks are explicit, so text-balance must stay off here. */}
             <h1 className="animate-rise t-hero font-semibold">
-              Your whole journey,
+              {t("hero.title1")}
               <br />
               <span className="accent font-normal text-white/55">
-                instantly findable
+                {t("hero.title2")}
               </span>
             </h1>
 
             <p className="animate-rise t-sub mt-6 max-w-lg text-white/70 text-pretty">
-              Four years of certificates, projects and letters, read and
-              connected into one graph you can ask questions of.
+              {t("hero.sub")}
             </p>
 
             <p className="animate-rise mt-6 text-[0.8125rem] font-semibold tracking-[0.16em] text-white/40 uppercase">
-              Understands · Organises · Connects · Retrieves
+              {t("hero.tagline")}
             </p>
 
             <div className="animate-rise mt-8 flex flex-wrap items-center gap-3 lg:flex-nowrap">
@@ -105,14 +108,14 @@ function Hero() {
                 href="/upload"
                 className="btn btn-invert w-full !px-5 !py-3 sm:w-auto"
               >
-                Start your Chronicle
+                {t("hero.cta")}
                 <ArrowUpRight size={16} />
               </Link>
               <Link
                 href="/dashboard"
                 className="btn w-full border border-white/20 !px-5 !py-3 text-white hover:bg-white/10 sm:w-auto"
               >
-                See the demo
+                {t("hero.demo")}
               </Link>
               <TelegramButton className="btn w-full border border-white/20 !px-5 !py-3 text-white hover:bg-white/10 sm:w-auto" />
             </div>
@@ -124,11 +127,11 @@ function Hero() {
             <div className="animate-rise mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-[0.9375rem] text-white/55">
               <span className="inline-flex items-center gap-1.5">
                 <FileText size={14} />
-                Reads PDFs &amp; scans
+                {t("hero.reads")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Languages size={14} />
-                English &amp; Hindi
+                {t("hero.langs")}
               </span>
             </div>
           </div>
@@ -147,6 +150,7 @@ function Hero() {
 /* --------------------------------------------------------------- problem -- */
 
 function Problem() {
+  const { t } = useT();
   const rows = [
     { before: "certificate_final_v2.pdf", after: "Deep Learning Specialization" },
     { before: "Screenshot 2024-08-11.png", after: "Hackathon — Regional Winner" },
@@ -160,25 +164,22 @@ function Problem() {
         <Reveal>
           <span className="pill text-muted">
             <Users size={12} />
-            FOR STUDENTS
+            {t("problem.eyebrow")}
           </span>
         </Reveal>
 
         <Reveal delay={60}>
         <h2 className="t-section mt-5 max-w-3xl font-semibold text-balance">
-          Storage remembers files.
+          {t("problem.title1")}
           <br />
-          It doesn&apos;t remember{" "}
-          <span className="accent font-normal text-muted">you</span>.
+          {t("problem.title2")}{" "}
+          <span className="accent font-normal text-muted">{t("problem.title3")}</span>.
         </h2>
         </Reveal>
 
         <Reveal delay={110}>
         <p className="t-sub mt-4 max-w-2xl text-muted text-pretty">
-          A drive can hold a certificate for three years and still not know
-          it&apos;s the reason you got the internship. Chronicle models the
-          journey, not the directory — so a filename stops being the only thing
-          your history knows about itself.
+          {t("problem.body")}
         </p>
         </Reveal>
 
@@ -211,41 +212,42 @@ function Problem() {
 /* --------------------------------------------------------------- modules -- */
 
 function Modules() {
+  const { t } = useT();
   const modules = [
     {
       icon: Upload,
-      title: "Ingest anything",
-      body: "PDFs, photos of certificates, transcripts, DOCX, and portfolio links. Scans are read natively — there is no OCR step to configure.",
+      title: t("mod.ingest.t"),
+      body: t("mod.ingest.b"),
       color: "#2D6BFF",
     },
     {
       icon: GraduationCap,
-      title: "Categorise itself",
-      body: "Every upload lands in Projects, Skills, Certifications, Internships, Achievements or Academics. You never file anything by hand.",
+      title: t("mod.cat.t"),
+      body: t("mod.cat.b"),
       color: "#2E6F52",
     },
     {
       icon: Waypoints,
-      title: "Connect the dots",
-      body: "A certification proves a skill; a skill is applied in a project; a project leads to an internship. The graph assembles itself.",
+      title: t("mod.connect.t"),
+      body: t("mod.connect.b"),
       color: "#138A72",
     },
     {
       icon: Search,
-      title: "Ask in plain English",
-      body: "“Show my AI projects.” “My latest resume.” Vector retrieval over embeddings, not filename matching.",
+      title: t("mod.ask.t"),
+      body: t("mod.ask.b"),
       color: "#6D4AA7",
     },
     {
       icon: FileText,
-      title: "Originals, untouched",
-      body: "Every source file is preserved byte-for-byte and downloadable in its original format, forever.",
+      title: t("mod.orig.t"),
+      body: t("mod.orig.b"),
       color: "#B07A1E",
     },
     {
       icon: Link2,
-      title: "One shareable identity",
-      body: "A timeline and a knowledge graph that explain not just what you did, but how each thing led to the next.",
+      title: t("mod.identity.t"),
+      body: t("mod.identity.b"),
       color: "#C2641F",
     },
   ];
@@ -255,8 +257,8 @@ function Modules() {
       <div className="mx-auto max-w-6xl px-5 sm:px-6">
         <Reveal>
           <h2 className="t-section max-w-2xl font-semibold text-balance">
-            Six things,{" "}
-            <span className="accent font-normal text-muted">one system</span>.
+            {t("modules.title1")}{" "}
+            <span className="accent font-normal text-muted">{t("modules.title2")}</span>.
           </h2>
         </Reveal>
 
@@ -284,41 +286,42 @@ function Modules() {
 /* ----------------------------------------------------------- how it works -- */
 
 function HowItWorks() {
+  const { t } = useT();
   return (
     <section id="how" className="bg-canvas py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-5 sm:px-6">
         <Reveal>
           <h2 className="t-section font-semibold text-balance">
-            How Chronicle works
+            {t("how.title")}
           </h2>
           <p className="t-sub mt-4 max-w-xl text-muted text-pretty">
-            No folders. No tagging. Drop a file in and it files itself.
+            {t("how.sub")}
           </p>
         </Reveal>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Step
             n="01"
-            title="Drop in a document"
-            body="A certificate, a project report, an internship letter, or a portfolio link. PDFs and photos go straight to Gemini as bytes."
+            title={t("how.1.t")}
+            body={t("how.1.b")}
             mock={<MockUpload />}
           />
           <Step
             n="02"
-            title="Gemini reads it"
-            body="Structured extraction returns the title, issuer, dates, canonical skills and measurable outcomes — never invented, only what the document supports."
+            title={t("how.2.t")}
+            body={t("how.2.b")}
             mock={<MockExtract />}
           />
           <Step
             n="03"
-            title="It joins the graph"
-            body="Shared skills and issuers create provable edges. Semantic neighbours are labelled with a real relationship: proves, applies, led to."
+            title={t("how.3.t")}
+            body={t("how.3.b")}
             mock={<MockGraph />}
           />
           <Step
             n="04"
-            title="Ask for it back"
-            body="Your question becomes filters plus a vector search over pgvector, answered in a sentence with the originals attached."
+            title={t("how.4.t")}
+            body={t("how.4.b")}
             mock={<MockSearch />}
           />
         </div>
@@ -450,6 +453,7 @@ function MockSearch() {
 /* ------------------------------------------------------------- retrieval -- */
 
 function Retrieval() {
+  const { t } = useT();
   const results = [
     {
       title: "Deep Learning Specialization",
@@ -475,19 +479,17 @@ function Retrieval() {
           <div>
             <span className="pill text-muted">
               <Search size={12} />
-              INSTANT RETRIEVAL
+              {t("ret.eyebrow")}
             </span>
             <h2 className="t-section mt-6 font-semibold text-balance">
-              Ask the way you&apos;d ask{" "}
-              <span className="accent font-normal text-muted">a friend</span>.
+              {t("ret.title1")}{" "}
+              <span className="accent font-normal text-muted">{t("ret.title2")}</span>.
             </h2>
             <p className="t-sub mt-5 max-w-md text-muted text-pretty">
-              Your question is parsed into filters, ranked by an HNSW vector
-              index in Postgres, boosted by exact matches, and answered in a
-              sentence — with every original one click away.
+              {t("ret.body")}
             </p>
             <Link href="/search" className="btn btn-primary mt-8 !px-6 !py-3.5">
-              Try it on the demo journey
+              {t("ret.cta")}
               <ArrowUpRight size={16} />
             </Link>
           </div>
@@ -496,15 +498,13 @@ function Retrieval() {
             <div className="flex items-center gap-3 border-b border-lineSoft px-5 py-4">
               <Search size={16} className="shrink-0 text-faint" />
               <span className="text-[1rem] text-fg">
-                everything that proves I know machine learning
+                {t("ret.query")}
               </span>
             </div>
 
             <div className="border-b border-lineSoft bg-linen/60 px-5 py-4 dark:bg-mist/30">
               <p className="text-[0.9375rem] leading-relaxed text-graphite">
-                Three records establish it: the DeepLearning.AI specialization
-                certifies the theory, the hackathon win applies it in the field,
-                and the Wooble internship shipped it to production.
+                {t("ret.answer")}
               </p>
             </div>
 
@@ -534,23 +534,23 @@ function Retrieval() {
 /* ---------------------------------------------------------------- closer -- */
 
 function Closer() {
+  const { t } = useT();
   return (
     <section className="bg-canvas px-4 py-10 sm:px-6 sm:py-14">
       <div className="slab mx-auto max-w-6xl px-6 py-14 text-center sm:py-16 lg:py-20">
         <div className="relative">
           <h2 className="t-section mx-auto max-w-3xl font-semibold text-balance">
-            &ldquo;I never have to search through folders{" "}
-            <span className="accent font-normal text-white/55">again</span>.&rdquo;
+            &ldquo;{t("closer.title1")}{" "}
+            <span className="accent font-normal text-white/55">{t("closer.title2")}</span>.&rdquo;
           </h2>
           <p className="t-sub mx-auto mt-4 max-w-lg text-white/60 text-pretty">
-            Put four years in once. Ask for any of it in plain English forever
-            after.
+            {t("closer.body")}
           </p>
           <Link
             href="/upload"
             className="btn btn-invert mt-7 !px-6 !py-3"
           >
-            Start your Chronicle
+            {t("hero.cta")}
             <ArrowUpRight size={17} />
           </Link>
         </div>
@@ -562,23 +562,24 @@ function Closer() {
 /* ---------------------------------------------------------------- footer -- */
 
 function Footer() {
+  const { t } = useT();
   const columns = [
     {
-      title: "Product",
+      title: t("footer.product"),
       links: [
-        { href: "/dashboard", label: "Overview" },
-        { href: "/timeline", label: "Timeline" },
-        { href: "/graph", label: "Knowledge graph" },
-        { href: "/search", label: "Search" },
+        { href: "/dashboard", label: t("nav.overview") },
+        { href: "/timeline", label: t("nav.timeline") },
+        { href: "/graph", label: t("footer.knowledge") },
+        { href: "/search", label: t("nav.search") },
       ],
     },
     {
-      title: "Modules",
+      title: t("footer.modules"),
       links: [
-        { href: "/upload", label: "Ingestion" },
-        { href: "#modules", label: "Categorisation" },
-        { href: "#how", label: "Relationship engine" },
-        { href: "#retrieval", label: "Retrieval" },
+        { href: "/upload", label: t("footer.ingestion") },
+        { href: "#modules", label: t("footer.categorisation") },
+        { href: "#how", label: t("footer.relationships") },
+        { href: "#retrieval", label: t("nav.retrieval") },
       ],
     },
   ];
@@ -599,9 +600,9 @@ function Footer() {
             so the footer opens with the brand rather than trailing off. */}
         <div className="pt-14 pb-10 sm:pt-16 sm:pb-12">
           <h2 className="t-section max-w-xl font-semibold text-white">
-            Your journey,
+            {t("footer.title1")}
             <br />
-            made searchable.
+            {t("footer.title2")}
           </h2>
         </div>
 
@@ -609,9 +610,7 @@ function Footer() {
           <div>
             <Logo href={null} className="text-white" />
             <p className="mt-4 max-w-xs text-[0.9375rem] leading-relaxed text-white/50 text-pretty">
-              An AI digital identity system that understands a student&apos;s
-              growth, achievements, skills and experiences — and makes every one
-              of them instantly retrievable.
+              {t("footer.about")}
             </p>
           </div>
 
@@ -638,13 +637,13 @@ function Footer() {
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 py-7">
           <p className="text-[0.875rem] text-white/40">
-            © 2026 Chronicle · Originals preserved, never rewritten
+            {t("footer.rights")}
           </p>
           <Link
             href="/upload"
             className="pill pressable !py-2 border-white/15 text-white/70 hover:bg-white/10 hover:text-white"
           >
-            Start your Chronicle
+            {t("hero.cta")}
             <ArrowUpRight size={12} />
           </Link>
         </div>

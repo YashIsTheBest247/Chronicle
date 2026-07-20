@@ -16,6 +16,7 @@ import {
 import { CategoryPill } from "@/components/CategoryPill";
 import { categoryColor, formatBytes, formatDate } from "@/lib/utils";
 import type { ClientItem, Relation } from "@/lib/types";
+import { useT } from "@/lib/i18n";
 
 interface Connection {
   relation: Relation;
@@ -30,6 +31,7 @@ export default function RecordPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { t } = useT();
   const router = useRouter();
   const [data, setData] = useState<{
     item: ClientItem;
@@ -45,7 +47,7 @@ export default function RecordPage({
   }, [id]);
 
   async function remove() {
-    if (!confirm("Delete this record and its original file? This can't be undone.")) {
+    if (!confirm(t("rec.deleteConfirm"))) {
       return;
     }
     await fetch(`/api/items/${id}`, { method: "DELETE" });
@@ -55,9 +57,9 @@ export default function RecordPage({
   if (missing) {
     return (
       <p className="py-32 text-center text-[1rem] text-faint">
-        That record no longer exists.{" "}
+        {t("rec.gone")}{" "}
         <Link href="/dashboard" className="text-fg underline underline-offset-4">
-          Back to overview
+          {t("rec.backOverview")}
         </Link>
       </p>
     );
@@ -81,7 +83,7 @@ export default function RecordPage({
         className="inline-flex items-center gap-1.5 text-[0.875rem] text-muted transition-colors hover:text-fg"
       >
         <ArrowLeft size={14} />
-        Overview
+        {t("nav.overview")}
       </Link>
 
       <header className="space-y-4">
@@ -97,7 +99,7 @@ export default function RecordPage({
           <span className="inline-flex items-center gap-1.5">
             <Calendar size={13} />
             {formatDate(item.date)}
-            {item.dateConfidence === "approximate" && " (approx.)"}
+            {item.dateConfidence === "approximate" && ` ${t("rec.approx")}`}
           </span>
           {item.organization && (
             <span className="inline-flex items-center gap-1.5">
@@ -122,7 +124,7 @@ export default function RecordPage({
           </span>
 
           <div className="min-w-0 flex-1">
-            <p className="eyebrow">Original, preserved</p>
+            <p className="eyebrow">{t("rec.original")}</p>
             <p className="mt-1 truncate text-[0.9375rem] font-medium">
               {item.file?.name ?? item.url}
             </p>
@@ -143,14 +145,14 @@ export default function RecordPage({
                   className="btn btn-ghost !py-2 !text-sm"
                 >
                   <ExternalLink size={14} />
-                  Open
+                  {t("rec.open")}
                 </a>
                 <a
                   href={`/api/file/${item.file.id}?download`}
                   className="btn btn-primary !py-2 !text-sm"
                 >
                   <Download size={14} />
-                  Download
+                  {t("rec.download")}
                 </a>
               </>
             ) : (
@@ -161,7 +163,7 @@ export default function RecordPage({
                 className="btn btn-ghost !py-2 !text-sm"
               >
                 <ExternalLink size={14} />
-                Visit
+                {t("rec.visit")}
               </a>
             )}
           </div>
@@ -170,7 +172,7 @@ export default function RecordPage({
 
       <div className="grid gap-4 sm:grid-cols-2">
         {item.skills.length > 0 && (
-          <Panel title="Skills">
+          <Panel title={t("rec.skills")}>
             <div className="flex flex-wrap gap-1.5">
               {item.skills.map((s) => (
                 <span key={s} className="pill text-graphite">
@@ -182,7 +184,7 @@ export default function RecordPage({
         )}
 
         {item.highlights.length > 0 && (
-          <Panel title="Highlights">
+          <Panel title={t("rec.highlights")}>
             <ul className="space-y-1.5">
               {item.highlights.map((h) => (
                 <li
@@ -201,8 +203,10 @@ export default function RecordPage({
         <section className="space-y-3">
           <div className="flex items-center gap-3">
             <p className="eyebrow">
-              Connected to {connections.length} other record
-              {connections.length === 1 ? "" : "s"}
+              {t("rec.connectedTo")} {connections.length}{" "}
+              {connections.length === 1
+                ? t("rec.otherRecord")
+                : t("rec.otherRecords")}
             </p>
             <div className="rule-fade flex-1" />
           </div>
@@ -247,7 +251,7 @@ export default function RecordPage({
       {item.excerpt && (
         <details className="card group p-5">
           <summary className="cursor-pointer list-none text-[0.875rem] font-medium text-muted transition-colors hover:text-fg">
-            Source text read by the model
+            {t("rec.source")}
           </summary>
           <pre className="scrollbar-thin mt-4 max-h-80 overflow-auto text-[0.8125rem] leading-relaxed whitespace-pre-wrap text-faint">
             {item.excerpt}
@@ -261,7 +265,7 @@ export default function RecordPage({
           className="inline-flex items-center gap-1.5 text-[0.875rem] text-faint transition-colors hover:text-[#C0453B]"
         >
           <Trash2 size={13} />
-          Delete record
+          {t("rec.delete")}
         </button>
       </div>
     </div>

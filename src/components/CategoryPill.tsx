@@ -1,5 +1,8 @@
+"use client";
+
 import { categoryColor } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { useCategoryLabel } from "@/lib/i18n";
 
 /**
  * Category identity is carried by a colour dot rather than a filled chip —
@@ -15,6 +18,7 @@ export function CategoryPill({
   count?: number;
 }) {
   const color = categoryColor(category);
+  const label = useCategoryLabel();
   return (
     <span
       className={cn("pill text-muted", className)}
@@ -25,7 +29,7 @@ export function CategoryPill({
         style={{ background: color }}
         aria-hidden="true"
       />
-      {category}
+      {label(category)}
       {count !== undefined && (
         <span className="text-faint tabular-nums">{count}</span>
       )}

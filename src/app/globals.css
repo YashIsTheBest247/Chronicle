@@ -59,8 +59,8 @@
   --color-brand: #2d6bff;
   --color-brand-deep: #1a49bd;
 
-  --font-display: "Familjen Grotesk", "Hanken Grotesk", system-ui, sans-serif;
-  --font-sans: "Hanken Grotesk", system-ui, sans-serif;
+  --font-display: "Familjen Grotesk", "Noto Sans Devanagari", "Hanken Grotesk", system-ui, sans-serif;
+  --font-sans: "Hanken Grotesk", "Noto Sans Devanagari", system-ui, sans-serif;
   --font-serif: "Fraunces", Georgia, serif;
 
   --radius-card: 1.75rem;
@@ -73,6 +73,7 @@
   }
 
   html {
+    -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
@@ -101,6 +102,17 @@
     font-family: var(--font-display);
     letter-spacing: -0.022em;
     font-weight: 600;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  label[for],
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
   }
 
   ::selection {
@@ -410,11 +422,117 @@
   transition-duration: 0.06s;
 }
 
+/* Language cross-fade. Swapping every string at once reads as a flicker, so
+   the page dips before the swap and lifts after it. Applied to <body> rather
+   than a wrapper so fixed elements fade with the rest of the page. */
+body {
+  transition: opacity 0.22s ease;
+}
+html.lang-switching body {
+  opacity: 0.28;
+  transition: opacity 0.14s ease;
+}
+
+/* ---- chat launcher ------------------------------------------------------ */
+
+/* Two light-blue rings on load, so the assistant announces itself once
+   without becoming a permanently blinking distraction. */
+@keyframes launcher-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  70% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+.launcher-ping::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: #5b9dff;
+  /* Exactly two pulses, then it stays gone. */
+  animation: launcher-ping 1.1s cubic-bezier(0.22, 1, 0.36, 1) 2 both;
+  pointer-events: none;
+}
+
+/* The two icons occupy the same cell and swap by rotating through each
+   other, so opening reads as the bubble turning into the close control
+   rather than one icon being replaced by another. */
+.icon-swap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  transition: transform 0.45s cubic-bezier(0.34, 1.35, 0.5, 1);
+}
+/* The container spins a half turn; the icons counter-rotate so the X still
+   lands upright. The spin is what you see, not the swap. */
+.icon-swap[data-open="true"] {
+  transform: rotate(180deg);
+}
+.icon-swap > * {
+  grid-area: 1 / 1;
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.35, 0.5, 1),
+    opacity 0.22s ease;
+}
+.icon-swap > .is-hidden {
+  transform: rotate(90deg) scale(0.35);
+  opacity: 0;
+}
+.icon-swap > .is-shown {
+  transform: rotate(0deg) scale(1);
+  opacity: 1;
+}
+.icon-swap[data-open="true"] > .is-shown {
+  /* Undo the parent's half turn so the X is square, not upside-down. */
+  transform: rotate(180deg) scale(1);
+}
+
+/* Panel entrance — grows from the launcher corner rather than appearing. */
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.panel-in {
+  animation: panel-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: bottom right;
+}
+
+/* Chat bubbles rise in rather than popping, matching the page rhythm. */
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.bubble-in {
+  animation: bubble-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Route change fade — paired with the key on the app layout's main element */
 @keyframes page-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -422,7 +540,10 @@
   }
 }
 .page-in {
-  animation: page-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: page-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Promote once for the duration of the animation; without this the fade
+     repaints on every frame and stutters on low-end phones. */
+  will-change: opacity, transform;
 }
 
 /* Skeleton shimmer for loading states */
@@ -466,6 +587,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html.lang-switching body {
+    opacity: 1;
+  }
   html {
     /* Smooth scrolling is motion too — jump instantly instead. */
     scroll-behavior: auto;

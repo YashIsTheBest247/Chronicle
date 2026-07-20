@@ -17,13 +17,15 @@ import {
 } from "lucide-react";
 import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
+import { LanguageSwitch } from "./LanguageSwitch";
 
 const TABS = [
-  { href: "/dashboard", label: "Overview", icon: LayoutGrid },
-  { href: "/timeline", label: "Timeline", icon: GitBranch },
-  { href: "/graph", label: "Graph", icon: Waypoints },
-  { href: "/search", label: "Search", icon: Search },
-];
+  { href: "/dashboard", key: "nav.overview", icon: LayoutGrid },
+  { href: "/timeline", key: "nav.timeline", icon: GitBranch },
+  { href: "/graph", key: "nav.graph", icon: Waypoints },
+  { href: "/search", key: "nav.search", icon: Search },
+] as const;
 
 /** Same floating pill as the marketing site, carrying the app's own tabs. */
 export function AppNav() {
@@ -31,6 +33,7 @@ export function AppNav() {
   const { data: session } = useSession();
   const [dark, setDark] = useState(false);
   const [menu, setMenu] = useState(false);
+  const { t } = useT();
 
   useEffect(() => {
     setDark(document.documentElement.classList.contains("dark"));
@@ -54,7 +57,7 @@ export function AppNav() {
           <Logo href="/" />
 
           <nav className="ml-3 hidden items-center gap-0.5 md:flex">
-            {TABS.map(({ href, label, icon: Icon }) => {
+            {TABS.map(({ href, key, icon: Icon }) => {
               const active = pathname.startsWith(href);
               return (
                 <Link
@@ -68,7 +71,7 @@ export function AppNav() {
                   )}
                 >
                   <Icon size={14} />
-                  {label}
+                  {t(key)}
                 </Link>
               );
             })}
@@ -82,9 +85,11 @@ export function AppNav() {
             >
               {dark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
+            <LanguageSwitch compact />
+
             <Link href="/upload" className="btn btn-primary !px-5 !py-2.5">
               <Upload size={14} />
-              Add
+              {t("nav.add")}
             </Link>
 
             {/* Account menu — also the only place to sign out. */}
@@ -119,7 +124,7 @@ export function AppNav() {
                   <div className="card absolute right-0 z-20 mt-2 w-60 p-2">
                     <div className="border-b border-lineSoft px-3 py-2">
                       <p className="truncate text-[0.875rem] font-medium">
-                        {session?.user?.name ?? "Signed in"}
+                        {session?.user?.name ?? t("nav.signedIn")}
                       </p>
                       <p className="truncate text-[0.8125rem] text-faint">
                         {session?.user?.email}
@@ -131,14 +136,14 @@ export function AppNav() {
                       className="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-[0.9375rem] text-muted hover:bg-mist hover:text-fg"
                     >
                       <Settings size={15} />
-                      Settings
+                      {t("nav.settings")}
                     </Link>
                     <button
                       onClick={() => signOut({ redirectTo: "/" })}
                       className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-[0.9375rem] text-muted hover:bg-mist hover:text-fg"
                     >
                       <LogOut size={15} />
-                      Sign out
+                      {t("nav.signOut")}
                     </button>
                   </div>
                 </>
@@ -150,7 +155,7 @@ export function AppNav() {
         {/* Tabs wrap below the bar on narrow screens rather than collapsing */}
         <div className="nav-shell nav-shell-light relative mt-2 !px-2 !py-1.5 md:hidden">
           <nav className="scrollbar-thin flex w-full items-center gap-1 overflow-x-auto">
-            {TABS.map(({ href, label, icon: Icon }) => {
+            {TABS.map(({ href, key, icon: Icon }) => {
               const active = pathname.startsWith(href);
               return (
                 <Link
@@ -162,7 +167,7 @@ export function AppNav() {
                   )}
                 >
                   <Icon size={13} />
-                  {label}
+                  {t(key)}
                 </Link>
               );
             })}

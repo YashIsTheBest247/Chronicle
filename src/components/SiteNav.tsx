@@ -5,13 +5,15 @@ import Link from "next/link";
 import { ArrowUpRight, Menu, Moon, Search, Sun, X } from "lucide-react";
 import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
+import { LanguageSwitch } from "./LanguageSwitch";
 
 const LINKS = [
-  { href: "#how", label: "How it works" },
-  { href: "#modules", label: "What it does" },
-  { href: "#retrieval", label: "Retrieval" },
-  { href: "/dashboard", label: "Demo" },
-];
+  { href: "#how", key: "nav.how" },
+  { href: "#modules", key: "nav.what" },
+  { href: "#retrieval", key: "nav.retrieval" },
+  { href: "/dashboard", key: "nav.dashboard" },
+] as const;
 
 /**
  * Floating pill navigation. It rides over a dark hero, so it starts in a dark
@@ -22,6 +24,7 @@ export function SiteNav() {
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
+  const { t } = useT();
 
   useEffect(() => {
     setDark(document.documentElement.classList.contains("dark"));
@@ -96,7 +99,7 @@ export function SiteNav() {
                     : "text-muted hover:bg-mist hover:text-fg",
                 )}
               >
-                {l.label}
+                {t(l.key)}
               </Link>
             ))}
           </nav>
@@ -115,6 +118,8 @@ export function SiteNav() {
               {dark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
+            <LanguageSwitch onDark={onDark} compact />
+
             <Link
               href="/search"
               className={cn(
@@ -125,7 +130,7 @@ export function SiteNav() {
               )}
             >
               <Search size={15} />
-              Search
+              {t("nav.search")}
             </Link>
 
             <Link
@@ -135,7 +140,7 @@ export function SiteNav() {
                 onDark ? "btn-invert" : "btn-primary",
               )}
             >
-              Open Chronicle
+              {t("nav.open")}
               <ArrowUpRight size={15} />
             </Link>
 
@@ -163,7 +168,7 @@ export function SiteNav() {
                 onClick={() => setOpen(false)}
                 className="block rounded-full px-4 py-2.5 text-[1rem] font-medium text-muted hover:bg-mist hover:text-fg"
               >
-                {l.label}
+                {t(l.key)}
               </Link>
             ))}
             <Link
@@ -171,7 +176,7 @@ export function SiteNav() {
               className="btn btn-primary mt-1 w-full"
               onClick={() => setOpen(false)}
             >
-              Open Chronicle
+              {t("nav.open")}
               <ArrowUpRight size={15} />
             </Link>
           </div>

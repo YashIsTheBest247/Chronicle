@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, Lock } from "lucide-react";
 import { auth, signIn } from "@/auth";
 import { Logo } from "@/components/Logo";
+import { LoginCopy } from "@/components/LoginCopy";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
 
 export const metadata = { title: "Sign in · Chronicle" };
 
@@ -28,16 +30,20 @@ export default async function LoginPage({
           className="mb-8 inline-flex items-center gap-1.5 text-[0.9375rem] text-muted transition-colors hover:text-fg"
         >
           <ArrowLeft size={15} />
-          Back
+          <LoginCopy part="back" />
         </Link>
 
         <div className="card p-8">
-          <Logo href={null} />
+          <div className="flex items-start justify-between gap-4">
+            <Logo href={null} />
+            <LanguageSwitch compact />
+          </div>
 
-          <h1 className="t-page mt-6">Sign in to Chronicle</h1>
+          <h1 className="t-page mt-6">
+            <LoginCopy part="title" />
+          </h1>
           <p className="mt-3 text-[1rem] leading-relaxed text-muted text-pretty">
-            Your records are private to your account. Nobody else can see or
-            download them.
+            <LoginCopy part="body" />
           </p>
 
           {configured ? (
@@ -52,7 +58,7 @@ export default async function LoginPage({
             >
               <button type="submit" className="btn btn-primary w-full !py-3.5">
                 <GoogleMark />
-                Continue with Google
+                <LoginCopy part="google" />
               </button>
             </form>
           ) : (
@@ -71,8 +77,7 @@ export default async function LoginPage({
           )}
 
           <p className="mt-6 border-t border-lineSoft pt-5 text-[0.875rem] leading-relaxed text-faint text-pretty">
-            Chronicle stores the documents you upload so it can hand them back.
-            Sign out any time; deleting a record deletes its original file too.
+            <LoginCopy part="note" />
           </p>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Send } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 /**
  * The Telegram bot does not exist yet. Rather than render a link to "#" —
@@ -10,6 +11,7 @@ import { Send } from "lucide-react";
  * change.
  */
 export function TelegramButton({ className }: { className?: string }) {
+  const { t } = useT();
   const url = process.env.NEXT_PUBLIC_TELEGRAM_URL;
   const [nudged, setNudged] = useState(false);
 
@@ -17,7 +19,7 @@ export function TelegramButton({ className }: { className?: string }) {
     return (
       <a href={url} target="_blank" rel="noreferrer" className={className}>
         <Send size={16} />
-        Chat on Telegram
+        {t("hero.telegram")}
       </a>
     );
   }
@@ -33,7 +35,7 @@ export function TelegramButton({ className }: { className?: string }) {
       className={className}
     >
       <Send size={16} />
-      {nudged ? "Bot coming soon" : "Chat on Telegram"}
+      {nudged ? "Bot coming soon" : t("hero.telegram")}
     </button>
   );
 }

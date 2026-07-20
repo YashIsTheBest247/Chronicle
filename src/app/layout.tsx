@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ChatWidget } from "@/components/ChatWidget";
+import { LanguageProvider } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "Chronicle · Your journey, understood",
@@ -25,13 +26,15 @@ export default function RootLayout({
           crossOrigin=""
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..600&family=Fraunces:ital,opsz,wght@1,9..144,300..500&family=Hanken+Grotesk:wght@300..800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..600&family=Fraunces:ital,opsz,wght@1,9..144,300..500&family=Hanken+Grotesk:wght@300..800&family=Noto+Sans+Devanagari:wght@300..700&display=swap"
           rel="stylesheet"
         />
       </head>
       <body>
-        {children}
-        <ChatWidget />
+        <LanguageProvider>
+          {children}
+          <ChatWidget />
+        </LanguageProvider>
       </body>
     </html>
   );

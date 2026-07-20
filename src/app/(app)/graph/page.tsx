@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { CategoryPill } from "@/components/CategoryPill";
 import { CATEGORIES, CATEGORY_COLOR } from "@/lib/types";
+import { useCategoryLabel, useT } from "@/lib/i18n";
 
 interface GNode {
   id: string;
@@ -37,6 +38,8 @@ interface Body extends GNode {
 }
 
 export default function GraphPage() {
+  const { t } = useT();
+  const catLabel = useCategoryLabel();
   const [data, setData] = useState<{ nodes: GNode[]; links: GLink[] } | null>(
     null,
   );
@@ -293,9 +296,9 @@ export default function GraphPage() {
   if (data.nodes.length === 0) {
     return (
       <p className="py-32 text-center text-[1rem] text-faint">
-        No records to map yet.{" "}
+        {t("graph.empty")}{" "}
         <Link href="/upload" className="inline-block py-1.5 text-fg underline underline-offset-4">
-          Add a few
+          {t("graph.addFew")}
         </Link>
         .
       </p>
@@ -306,13 +309,12 @@ export default function GraphPage() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="eyebrow">Knowledge graph</p>
+          <p className="eyebrow">{t("graph.eyebrow")}</p>
           <h1 className="t-page mt-2">
-            {data.nodes.length} records, {data.links.length} connections
+            {data.nodes.length} {t("dash.records")}, {data.links.length} {t("dash.connections")}
           </h1>
           <p className="mt-1 text-[0.9375rem] text-muted">
-            Click a node to trace what it connects to. Size reflects how central
-            a record is to your journey.
+            {t("graph.sub")}
           </p>
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -324,7 +326,7 @@ export default function GraphPage() {
                 className="size-1.5 rounded-full"
                 style={{ background: CATEGORY_COLOR[c] }}
               />
-              {c}
+              {catLabel(c)}
             </span>
           ))}
         </div>
@@ -356,8 +358,10 @@ export default function GraphPage() {
 
               <div>
                 <p className="eyebrow">
-                  {selectedLinks.length} connection
-                  {selectedLinks.length === 1 ? "" : "s"}
+                  {selectedLinks.length}{" "}
+                  {selectedLinks.length === 1
+                    ? t("graph.connection")
+                    : t("graph.connectionsN")}
                 </p>
                 <ul className="mt-2.5 space-y-2.5">
                   {selectedLinks.map(({ link, other }) => (
@@ -381,18 +385,16 @@ export default function GraphPage() {
                 href={`/record/${selected.id}`}
                 className="btn btn-ghost w-full !py-2 !text-sm"
               >
-                Open record
+                {t("graph.open")}
               </Link>
             </div>
           ) : (
             <div className="py-6 text-center">
               <p className="text-[0.9375rem] text-muted">
-                Select a node to see what it connects to.
+                {t("graph.select")}
               </p>
               <p className="mt-3 text-[0.875rem] text-faint text-pretty">
-                Edges come from two places: shared skills and issuers, which are
-                provable, and semantic neighbours that Gemini labelled with a
-                relationship.
+                {t("graph.hint")}
               </p>
             </div>
           )}

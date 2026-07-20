@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CategoryPill } from "@/components/CategoryPill";
 import { ListSkeleton } from "@/components/Skeleton";
+import { useT } from "@/lib/i18n";
 import { categoryColor, formatDate } from "@/lib/utils";
 import type { ClientItem } from "@/lib/types";
 
@@ -13,6 +14,7 @@ interface Payload {
 }
 
 export default function TimelinePage() {
+  const { t } = useT();
   const [data, setData] = useState<Payload | null>(null);
 
   useEffect(() => {
@@ -33,9 +35,9 @@ export default function TimelinePage() {
   if (data.total === 0) {
     return (
       <p className="py-32 text-center text-[1rem] text-faint">
-        Nothing on the timeline yet.{" "}
+        {t("time.empty")}{" "}
         <Link href="/upload" className="inline-block py-1.5 text-fg underline underline-offset-4">
-          Add a record
+          {t("time.addRecord")}
         </Link>
         .
       </p>
@@ -45,12 +47,12 @@ export default function TimelinePage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <header>
-        <p className="eyebrow">Digital journey</p>
+        <p className="eyebrow">{t("time.eyebrow")}</p>
         <h1 className="t-page mt-2 text-balance">
-          How you got here, year by year.
+          {t("time.title")}
         </h1>
         <p className="mt-2 text-[1rem] text-muted">
-          Assembled from the dates inside your own documents.
+          {t("time.sub")}
         </p>
       </header>
 

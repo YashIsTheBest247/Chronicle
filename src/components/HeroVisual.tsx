@@ -1,4 +1,7 @@
+"use client";
+
 import { ArrowDown, Check, FileText, Sparkles } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 /**
  * The hero's right-hand panel: one document travelling through Chronicle.
@@ -9,6 +12,7 @@ import { ArrowDown, Check, FileText, Sparkles } from "lucide-react";
  * deliberately compact so the hero fits one viewport without scrolling.
  */
 export function HeroVisual() {
+  const { t } = useT();
   return (
     <div className="relative mx-auto w-full max-w-[22rem]">
       <div className="space-y-2.5">
@@ -24,7 +28,7 @@ export function HeroVisual() {
         <div className="flex items-center justify-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/35 px-2.5 py-1 text-[0.75rem] font-medium text-white/65 backdrop-blur-md">
             <Sparkles size={10} className="text-[#2D6BFF]" />
-            Gemini reads it
+            {t("panel.reads")}
           </span>
           <ArrowDown size={12} className="text-white/30" />
         </div>
@@ -60,7 +64,7 @@ export function HeroVisual() {
           <div className="mt-2.5 flex items-center gap-2 border-t border-white/10 pt-2.5">
             <Check size={12} className="shrink-0 text-[#4CAF7D]" />
             <span className="text-[0.75rem] text-white/55">
-              96% average · filed automatically
+              {t("panel.filed")}
             </span>
           </div>
         </div>
@@ -68,13 +72,13 @@ export function HeroVisual() {
         {/* 4 — and what it connected to */}
         <div className="rounded-2xl border border-white/12 bg-black/35 p-3.5 backdrop-blur-md">
           <p className="text-[0.6875rem] font-semibold tracking-[0.14em] text-white/40 uppercase">
-            3 connections found
+            {t("panel.found")}
           </p>
           <ul className="mt-2 space-y-1.5">
             {[
-              { c: "#2D6BFF", rel: "applied in", to: "Placement Dashboard" },
-              { c: "#8A6BC8", rel: "led to", to: "ML Intern · Wooble" },
-              { c: "#4CAF7D", rel: "proves", to: "Python" },
+              { c: "#2D6BFF", rel: t("panel.appliedIn"), to: "Placement Dashboard" },
+              { c: "#8A6BC8", rel: t("panel.ledTo"), to: "ML Intern · Wooble" },
+              { c: "#4CAF7D", rel: t("panel.proves"), to: "Python" },
             ].map((r) => (
               <li key={r.to} className="flex items-center gap-2">
                 <span

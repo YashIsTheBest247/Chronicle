@@ -1,0 +1,475 @@
+/**
+ * Chronicle's string table.
+ *
+ * Flat keys rather than nested objects so a missing translation is a compile
+ * error, not a silent `undefined` deep in an object path — `Dict` is derived
+ * from the English table, so `hi` must supply every key.
+ *
+ * Hindi copy is written to be read, not transliterated: product nouns that
+ * students actually say in English (resume, project, internship) stay in
+ * English rather than being forced into Sanskritised Hindi nobody uses.
+ */
+
+export const en = {
+  // -- navigation ----------------------------------------------------------
+  "nav.how": "How it works",
+  "nav.what": "What it does",
+  "nav.retrieval": "Retrieval",
+  "nav.dashboard": "Dashboard",
+  "nav.open": "Open Chronicle",
+  "nav.search": "Search",
+  "nav.overview": "Overview",
+  "nav.timeline": "Timeline",
+  "nav.graph": "Graph",
+  "nav.add": "Add",
+  "nav.settings": "Settings",
+  "nav.signOut": "Sign out",
+  "nav.signedIn": "Signed in",
+  "nav.back": "Back",
+
+  // -- landing: hero -------------------------------------------------------
+  "hero.title1": "Your whole journey,",
+  "hero.title2": "instantly findable",
+  "hero.sub":
+    "Every certificate, project and letter you collect — read, understood, and connected into one graph you can ask questions of.",
+  "hero.tagline": "Understands · Organises · Connects · Retrieves",
+  "hero.cta": "Start your Chronicle",
+  "hero.demo": "Open my Chronicle",
+  "hero.telegram": "Chat on Telegram",
+  "hero.reads": "Reads PDFs & scans",
+  "hero.langs": "English & Hindi",
+  "panel.reads": "Gemini reads it",
+  "panel.filed": "96% average · filed automatically",
+  "panel.found": "3 connections found",
+  "panel.appliedIn": "applied in",
+  "panel.ledTo": "led to",
+  "panel.proves": "proves",
+
+  // -- landing: problem ----------------------------------------------------
+  "problem.eyebrow": "FOR STUDENTS",
+  "problem.title1": "Storage remembers files.",
+  "problem.title2": "It doesn't remember",
+  "problem.title3": "you",
+  "problem.body":
+    "A drive can hold a certificate for three years and still not know it's the reason you got the internship. Chronicle models the journey, not the directory — so a filename stops being the only thing your history knows about itself.",
+
+  // -- landing: modules ----------------------------------------------------
+  "modules.title1": "Six things,",
+  "modules.title2": "one system",
+  "mod.ingest.t": "Ingest anything",
+  "mod.ingest.b":
+    "PDFs, photos of certificates, transcripts, DOCX, and portfolio links. Scans are read natively — there is no OCR step to configure.",
+  "mod.cat.t": "Categorise itself",
+  "mod.cat.b":
+    "Every upload lands in Projects, Skills, Certifications, Internships, Achievements or Academics. You never file anything by hand.",
+  "mod.connect.t": "Connect the dots",
+  "mod.connect.b":
+    "A certification proves a skill; a skill is applied in a project; a project leads to an internship. The graph assembles itself.",
+  "mod.ask.t": "Ask in plain English",
+  "mod.ask.b":
+    "“Show my AI projects.” “My latest resume.” Vector retrieval over embeddings, not filename matching.",
+  "mod.orig.t": "Originals, untouched",
+  "mod.orig.b":
+    "Every source file is preserved byte-for-byte and downloadable in its original format, forever.",
+  "mod.identity.t": "One shareable identity",
+  "mod.identity.b":
+    "A timeline and a knowledge graph that explain not just what you did, but how each thing led to the next.",
+
+  // -- landing: how it works ----------------------------------------------
+  "how.title": "How Chronicle works",
+  "how.sub": "No folders. No tagging. Drop a file in and it files itself.",
+  "how.1.t": "Drop in a document",
+  "how.1.b":
+    "A certificate, a project report, an internship letter, or a portfolio link. PDFs and photos go straight to Gemini as bytes.",
+  "how.2.t": "Gemini reads it",
+  "how.2.b":
+    "Structured extraction returns the title, issuer, dates, canonical skills and measurable outcomes — never invented, only what the document supports.",
+  "how.3.t": "It joins the graph",
+  "how.3.b":
+    "Shared skills and issuers create provable edges. Semantic neighbours are labelled with a real relationship: proves, applies, led to.",
+  "how.4.t": "Ask for it back",
+  "how.4.b":
+    "Your question becomes filters plus a vector search over pgvector, answered in a sentence with the originals attached.",
+
+  // -- landing: retrieval + closer ----------------------------------------
+  "ret.eyebrow": "INSTANT RETRIEVAL",
+  "ret.title1": "Ask the way you'd ask",
+  "ret.title2": "a friend",
+  "ret.body":
+    "Your question is parsed into filters, ranked by an HNSW vector index in Postgres, boosted by exact matches, and answered in a sentence — with every original one click away.",
+  "ret.cta": "Try it in search",
+  "ret.query": "everything that proves I know machine learning",
+  "ret.answer":
+    "Three records establish it: the DeepLearning.AI specialization certifies the theory, the hackathon win applies it in the field, and the Wooble internship shipped it to production.",
+  "closer.title1": "I never have to search through folders",
+  "closer.title2": "again",
+  "closer.body":
+    "Add it once. Ask for any of it in plain English, forever after.",
+
+  // -- footer --------------------------------------------------------------
+  "footer.title1": "Your journey,",
+  "footer.title2": "made searchable.",
+  "footer.about":
+    "An AI digital identity system that understands a student's growth, achievements, skills and experiences — and makes every one of them instantly retrievable.",
+  "footer.product": "Product",
+  "footer.modules": "Modules",
+  "footer.knowledge": "Knowledge graph",
+  "footer.ingestion": "Ingestion",
+  "footer.categorisation": "Categorisation",
+  "footer.relationships": "Relationship engine",
+  "footer.rights": "© 2026 Chronicle · Originals preserved, never rewritten",
+
+  // -- auth ----------------------------------------------------------------
+  "login.title": "Sign in to Chronicle",
+  "login.body":
+    "Your records are private to your account. Nobody else can see or download them.",
+  "login.google": "Continue with Google",
+  "login.note":
+    "Chronicle stores the documents you upload so it can hand them back. Sign out any time; deleting a record deletes its original file too.",
+
+  // -- dashboard -----------------------------------------------------------
+  "dash.eyebrow": "Overview",
+  "dash.records": "records",
+  "dash.connections": "connections",
+  "dash.addRecords": "Add records",
+  "dash.distribution": "Distribution",
+  "dash.skills": "Skills detected",
+  "dash.viewGraph": "View graph",
+  "dash.all": "All",
+  "dash.emptyTitle": "Your Chronicle is empty.",
+  "dash.emptyBody":
+    "Add a certificate, a project report, or an internship letter and it will organise, categorise, and connect itself. Or load a sample journey to see what a filled-in Chronicle looks like.",
+  "dash.addFirst": "Add your first record",
+  "dash.loadDemo": "Load sample journey",
+  "dash.building": "Building sample…",
+
+  // -- timeline / graph ----------------------------------------------------
+  "time.eyebrow": "Digital journey",
+  "time.title": "How you got here, year by year.",
+  "time.sub": "Assembled from the dates inside your own documents.",
+  "time.empty": "Nothing on the timeline yet.",
+  "time.addRecord": "Add a record",
+  "graph.eyebrow": "Knowledge graph",
+  "graph.sub":
+    "Click a node to trace what it connects to. Size reflects how central a record is to your journey.",
+  "graph.empty": "No records to map yet.",
+  "graph.addFew": "Add a few",
+  "graph.select": "Select a node to see what it connects to.",
+  "graph.hint":
+    "Edges come from two places: shared skills and issuers, which are provable, and semantic neighbours that Gemini labelled with a relationship.",
+  "graph.open": "Open record",
+  "graph.connection": "connection",
+  "graph.connectionsN": "connections",
+
+  // -- search --------------------------------------------------------------
+  "search.eyebrow": "Retrieval",
+  "search.title": "Ask for anything you've ever done.",
+  "search.placeholder":
+    "show me everything that proves I know machine learning",
+  "search.understood": "Understood as",
+  "search.none": "Nothing matched that query.",
+  "search.matched": "matched on",
+  "search.ex1": "Show all my certificates",
+  "search.ex2": "Show my AI projects",
+  "search.ex3": "Show internship documents",
+  "search.ex4": "Show my latest resume",
+  "search.ex5": "What proves I know Python?",
+  "search.ex6": "Everything from 2024",
+
+  // -- upload --------------------------------------------------------------
+  "up.eyebrow": "Add to Chronicle",
+  "up.title": "Drop it in. It files itself.",
+  "up.sub":
+    "Certificates, résumés, project reports, internship letters, transcripts, portfolio links. PDFs and photos of certificates are read directly — no OCR setup needed.",
+  "up.drop": "Drop files here, or click to browse",
+  "up.formats": "PDF, PNG, JPG, DOCX, TXT, MD",
+  "up.url": "…or paste a portfolio, GitHub, or LinkedIn URL",
+  "up.add": "Add",
+  "up.processed": "processed",
+  "up.goOverview": "Go to overview",
+  "up.reading": "Reading, categorising, and connecting…",
+  "up.found": "found",
+  "up.connectionsFound": "connections found",
+
+  // -- record --------------------------------------------------------------
+  "rec.original": "Original, preserved",
+  "rec.open": "Open",
+  "rec.download": "Download",
+  "rec.visit": "Visit",
+  "rec.skills": "Skills",
+  "rec.highlights": "Highlights",
+  "rec.connectedTo": "Connected to",
+  "rec.otherRecords": "other records",
+  "rec.otherRecord": "other record",
+  "rec.source": "Source text read by the model",
+  "rec.delete": "Delete record",
+  "rec.deleteConfirm":
+    "Delete this record and its original file? This can't be undone.",
+  "rec.gone": "That record no longer exists.",
+  "rec.backOverview": "Back to overview",
+  "rec.approx": "(approx.)",
+
+  // -- settings ------------------------------------------------------------
+  "set.eyebrow": "Settings",
+  "set.title": "Connect Telegram",
+  "set.sub":
+    "Ask for any record from your phone and get the original file back as a download — without opening Chronicle.",
+  "set.connected": "Telegram connected",
+  "set.connectedSub":
+    "Message the bot and ask for anything in your Chronicle.",
+  "set.disconnect": "Disconnect",
+  "set.step1a": "Open",
+  "set.step1b": "the Chronicle bot",
+  "set.step1c": "in Telegram and press Start.",
+  "set.step2":
+    "Generate a code and send it to the bot as a message. It expires in 15 minutes and works once.",
+  "set.generate": "Generate linking code",
+  "set.copy": "Copy",
+  "set.copied": "Copied",
+  "set.sent": "I've sent it",
+  "set.warning":
+    "A linked chat can read and download everything in your Chronicle, so only link a chat you control. Disconnecting revokes access immediately.",
+  "set.noBot": "No bot is configured on this server.",
+  "set.language": "Language",
+  "set.languageSub": "Applies across the app, and to what the assistant speaks.",
+
+  // -- categories ----------------------------------------------------------
+  "cat.Projects": "Projects",
+  "cat.Skills": "Skills",
+  "cat.Certifications": "Certifications",
+  "cat.Internships": "Internships",
+  "cat.Achievements": "Achievements",
+  "cat.Academics": "Academics",
+  "cat.Other": "Other",
+
+  // -- shared --------------------------------------------------------------
+  "common.undated": "Undated",
+  "common.loading": "Loading…",
+  "common.signIn": "Sign in",
+} as const;
+
+export type DictKey = keyof typeof en;
+export type Dict = Record<DictKey, string>;
+
+export const hi: Dict = {
+  "nav.how": "यह कैसे काम करता है",
+  "nav.what": "यह क्या करता है",
+  "nav.retrieval": "खोज",
+  "nav.dashboard": "डैशबोर्ड",
+  "nav.open": "Chronicle खोलें",
+  "nav.search": "खोजें",
+  "nav.overview": "अवलोकन",
+  "nav.timeline": "टाइमलाइन",
+  "nav.graph": "ग्राफ़",
+  "nav.add": "जोड़ें",
+  "nav.settings": "सेटिंग्स",
+  "nav.signOut": "साइन आउट",
+  "nav.signedIn": "साइन इन किया हुआ",
+  "nav.back": "वापस",
+
+  "hero.title1": "आपकी पूरी यात्रा,",
+  "hero.title2": "पल भर में हाज़िर",
+  "hero.sub":
+    "आपका हर प्रमाणपत्र, प्रोजेक्ट और पत्र — पढ़ा गया, समझा गया, और एक ऐसे ग्राफ़ में जुड़ा हुआ जिससे आप सवाल पूछ सकते हैं।",
+  "hero.tagline": "समझता है · व्यवस्थित करता है · जोड़ता है · ढूँढता है",
+  "hero.cta": "Chronicle शुरू करें",
+  "hero.demo": "मेरा Chronicle खोलें",
+  "hero.telegram": "Telegram पर बात करें",
+  "hero.reads": "PDF और स्कैन पढ़ता है",
+  "hero.langs": "अंग्रेज़ी और हिंदी",
+  "panel.reads": "Gemini इसे पढ़ता है",
+  "panel.filed": "96% औसत · अपने आप दर्ज",
+  "panel.found": "3 कड़ियाँ मिलीं",
+  "panel.appliedIn": "इसमें लगा",
+  "panel.ledTo": "आगे ले गया",
+  "panel.proves": "साबित करता है",
+
+  "problem.eyebrow": "छात्रों के लिए",
+  "problem.title1": "स्टोरेज को फ़ाइलें याद रहती हैं।",
+  "problem.title2": "उसे याद नहीं रहते",
+  "problem.title3": "आप",
+  "problem.body":
+    "एक ड्राइव तीन साल तक प्रमाणपत्र रख सकती है, फिर भी उसे नहीं पता कि वही आपकी इंटर्नशिप की वजह था। Chronicle फ़ोल्डर नहीं, आपकी यात्रा को समझता है — ताकि फ़ाइल का नाम ही आपके इतिहास की एकमात्र पहचान न रह जाए।",
+
+  "modules.title1": "छह काम,",
+  "modules.title2": "एक सिस्टम",
+  "mod.ingest.t": "कुछ भी अपलोड करें",
+  "mod.ingest.b":
+    "PDF, प्रमाणपत्रों की तस्वीरें, अंकपत्र, DOCX और पोर्टफोलियो लिंक। स्कैन सीधे पढ़े जाते हैं — कोई OCR सेटअप नहीं।",
+  "mod.cat.t": "खुद वर्गीकृत होता है",
+  "mod.cat.b":
+    "हर अपलोड Projects, Skills, Certifications, Internships, Achievements या Academics में चला जाता है। आपको कुछ भी हाथ से छाँटना नहीं पड़ता।",
+  "mod.connect.t": "कड़ियाँ जोड़ता है",
+  "mod.connect.b":
+    "एक प्रमाणपत्र किसी स्किल को साबित करता है; वह स्किल किसी प्रोजेक्ट में लगती है; वह प्रोजेक्ट इंटर्नशिप तक ले जाता है। ग्राफ़ खुद बनता है।",
+  "mod.ask.t": "आम भाषा में पूछें",
+  "mod.ask.b":
+    "“मेरे AI प्रोजेक्ट दिखाओ।” “मेरा नवीनतम resume।” फ़ाइल के नाम से नहीं, अर्थ के आधार पर खोज।",
+  "mod.orig.t": "मूल फ़ाइलें, ज्यों की त्यों",
+  "mod.orig.b":
+    "हर फ़ाइल बिल्कुल वैसी ही सुरक्षित रहती है और अपने मूल रूप में हमेशा डाउनलोड की जा सकती है।",
+  "mod.identity.t": "एक साझा करने योग्य पहचान",
+  "mod.identity.b":
+    "एक टाइमलाइन और ज्ञान-ग्राफ़ जो बताते हैं कि आपने क्या किया — और एक चीज़ दूसरी तक कैसे पहुँची।",
+
+  "how.title": "Chronicle कैसे काम करता है",
+  "how.sub":
+    "कोई फ़ोल्डर नहीं। कोई टैगिंग नहीं। फ़ाइल डालिए, वह खुद अपनी जगह ढूँढ लेगी।",
+  "how.1.t": "दस्तावेज़ डालें",
+  "how.1.b":
+    "प्रमाणपत्र, प्रोजेक्ट रिपोर्ट, इंटर्नशिप पत्र या पोर्टफोलियो लिंक। PDF और तस्वीरें सीधे Gemini तक जाती हैं।",
+  "how.2.t": "Gemini उसे पढ़ता है",
+  "how.2.b":
+    "शीर्षक, जारीकर्ता, तारीख़ें, स्किल और ठोस परिणाम निकाले जाते हैं — कुछ भी गढ़ा नहीं जाता, केवल वही जो दस्तावेज़ में है।",
+  "how.3.t": "वह ग्राफ़ से जुड़ता है",
+  "how.3.b":
+    "साझा स्किल और संस्थान पक्की कड़ियाँ बनाते हैं। अर्थ में पास के रिकॉर्ड को Gemini असली रिश्ता देता है: साबित करता है, इस्तेमाल हुआ, आगे ले गया।",
+  "how.4.t": "जब चाहें, माँग लें",
+  "how.4.b":
+    "आपका सवाल फ़िल्टर और pgvector पर वेक्टर खोज बनता है, और एक वाक्य में जवाब मिलता है — मूल फ़ाइल के साथ।",
+
+  "ret.eyebrow": "तुरंत खोज",
+  "ret.title1": "ऐसे पूछिए जैसे",
+  "ret.title2": "किसी दोस्त से",
+  "ret.body":
+    "आपका सवाल फ़िल्टर में बदलता है, Postgres के HNSW वेक्टर इंडेक्स से क्रम पाता है, सटीक मिलान से ऊपर आता है — और एक वाक्य में जवाब मिलता है, हर मूल फ़ाइल एक क्लिक दूर।",
+  "ret.cta": "खोज में आज़माएँ",
+  "ret.query": "वह सब जो साबित करे कि मुझे machine learning आती है",
+  "ret.answer":
+    "तीन रिकॉर्ड इसे साबित करते हैं: DeepLearning.AI का specialization सिद्धांत प्रमाणित करता है, हैकाथॉन की जीत उसे मैदान में लागू करती है, और Wooble की इंटर्नशिप उसे production तक ले जाती है।",
+  "closer.title1": "अब मुझे फ़ोल्डरों में कभी नहीं ढूँढना पड़ेगा",
+  "closer.title2": "दोबारा",
+  "closer.body":
+    "एक बार जोड़ दीजिए। उसके बाद हमेशा आम भाषा में माँग लीजिए।",
+
+  "footer.title1": "आपकी यात्रा,",
+  "footer.title2": "अब खोजी जा सकती है।",
+  "footer.about":
+    "एक AI डिजिटल पहचान प्रणाली जो एक छात्र की प्रगति, उपलब्धियों, स्किल और अनुभवों को समझती है — और हर एक को तुरंत सामने ले आती है।",
+  "footer.product": "प्रोडक्ट",
+  "footer.modules": "मॉड्यूल",
+  "footer.knowledge": "ज्ञान-ग्राफ़",
+  "footer.ingestion": "अपलोड",
+  "footer.categorisation": "वर्गीकरण",
+  "footer.relationships": "रिश्ता इंजन",
+  "footer.rights": "© 2026 Chronicle · मूल फ़ाइलें सुरक्षित, कभी बदली नहीं गईं",
+
+  "login.title": "Chronicle में साइन इन करें",
+  "login.body":
+    "आपके रिकॉर्ड सिर्फ़ आपके खाते तक सीमित हैं। कोई और उन्हें न देख सकता है, न डाउनलोड कर सकता है।",
+  "login.google": "Google से जारी रखें",
+  "login.note":
+    "Chronicle आपके अपलोड किए दस्तावेज़ इसलिए रखता है ताकि उन्हें लौटा सके। कभी भी साइन आउट करें; रिकॉर्ड मिटाने पर उसकी मूल फ़ाइल भी मिट जाती है।",
+
+  "dash.eyebrow": "अवलोकन",
+  "dash.records": "रिकॉर्ड",
+  "dash.connections": "कड़ियाँ",
+  "dash.addRecords": "रिकॉर्ड जोड़ें",
+  "dash.distribution": "वितरण",
+  "dash.skills": "पहचानी गई स्किल",
+  "dash.viewGraph": "ग्राफ़ देखें",
+  "dash.all": "सभी",
+  "dash.emptyTitle": "आपका Chronicle अभी खाली है।",
+  "dash.emptyBody":
+    "कोई प्रमाणपत्र, प्रोजेक्ट रिपोर्ट या इंटर्नशिप पत्र जोड़ें — वह खुद व्यवस्थित और वर्गीकृत हो जाएगा। या नमूना यात्रा लोड करके देखें कि भरा हुआ Chronicle कैसा दिखता है।",
+  "dash.addFirst": "अपना पहला रिकॉर्ड जोड़ें",
+  "dash.loadDemo": "नमूना यात्रा लोड करें",
+  "dash.building": "नमूना बन रहा है…",
+
+  "time.eyebrow": "डिजिटल यात्रा",
+  "time.title": "आप यहाँ तक कैसे पहुँचे, साल दर साल।",
+  "time.sub": "आपके अपने दस्तावेज़ों की तारीख़ों से बनाया गया।",
+  "time.empty": "टाइमलाइन पर अभी कुछ नहीं है।",
+  "time.addRecord": "रिकॉर्ड जोड़ें",
+  "graph.eyebrow": "ज्ञान-ग्राफ़",
+  "graph.sub":
+    "किसी नोड पर क्लिक करके देखें वह किससे जुड़ा है। आकार बताता है कि रिकॉर्ड आपकी यात्रा में कितना केंद्रीय है।",
+  "graph.empty": "अभी मैप करने के लिए कोई रिकॉर्ड नहीं।",
+  "graph.addFew": "कुछ जोड़ें",
+  "graph.select": "किसी नोड को चुनें और देखें वह किससे जुड़ा है।",
+  "graph.hint":
+    "कड़ियाँ दो जगह से आती हैं: साझा स्किल और संस्थान, जो पक्के हैं; और अर्थ में पास के रिकॉर्ड, जिन्हें Gemini ने रिश्ता दिया।",
+  "graph.open": "रिकॉर्ड खोलें",
+  "graph.connection": "कड़ी",
+  "graph.connectionsN": "कड़ियाँ",
+
+  "search.eyebrow": "खोज",
+  "search.title": "जो कुछ भी आपने किया है, पूछ लीजिए।",
+  "search.placeholder": "वह सब दिखाओ जो साबित करे कि मुझे machine learning आती है",
+  "search.understood": "ऐसे समझा गया",
+  "search.none": "इससे कुछ मेल नहीं खाया।",
+  "search.matched": "मिलान",
+  "search.ex1": "मेरे सारे प्रमाणपत्र दिखाओ",
+  "search.ex2": "मेरे AI प्रोजेक्ट दिखाओ",
+  "search.ex3": "इंटर्नशिप के दस्तावेज़ दिखाओ",
+  "search.ex4": "मेरा नवीनतम resume दिखाओ",
+  "search.ex5": "क्या साबित करता है कि मुझे Python आती है?",
+  "search.ex6": "2024 का सब कुछ",
+
+  "up.eyebrow": "Chronicle में जोड़ें",
+  "up.title": "डाल दीजिए। बाकी यह खुद कर लेगा।",
+  "up.sub":
+    "प्रमाणपत्र, resume, प्रोजेक्ट रिपोर्ट, इंटर्नशिप पत्र, अंकपत्र, पोर्टफोलियो लिंक। PDF और प्रमाणपत्रों की तस्वीरें सीधे पढ़ी जाती हैं — कोई OCR सेटअप नहीं।",
+  "up.drop": "फ़ाइलें यहाँ छोड़ें, या क्लिक करके चुनें",
+  "up.formats": "PDF, PNG, JPG, DOCX, TXT, MD",
+  "up.url": "…या कोई पोर्टफोलियो, GitHub या LinkedIn लिंक चिपकाएँ",
+  "up.add": "जोड़ें",
+  "up.processed": "पूरे हुए",
+  "up.goOverview": "अवलोकन पर जाएँ",
+  "up.reading": "पढ़ा जा रहा है, वर्गीकृत और जोड़ा जा रहा है…",
+  "up.found": "मिले",
+  "up.connectionsFound": "कड़ियाँ मिलीं",
+
+  "rec.original": "मूल फ़ाइल, सुरक्षित",
+  "rec.open": "खोलें",
+  "rec.download": "डाउनलोड",
+  "rec.visit": "देखें",
+  "rec.skills": "स्किल",
+  "rec.highlights": "मुख्य बातें",
+  "rec.connectedTo": "जुड़ा हुआ है",
+  "rec.otherRecords": "अन्य रिकॉर्ड से",
+  "rec.otherRecord": "अन्य रिकॉर्ड से",
+  "rec.source": "मॉडल ने जो टेक्स्ट पढ़ा",
+  "rec.delete": "रिकॉर्ड मिटाएँ",
+  "rec.deleteConfirm":
+    "यह रिकॉर्ड और इसकी मूल फ़ाइल मिटाएँ? यह वापस नहीं आएगा।",
+  "rec.gone": "यह रिकॉर्ड अब मौजूद नहीं है।",
+  "rec.backOverview": "अवलोकन पर वापस",
+  "rec.approx": "(लगभग)",
+
+  "set.eyebrow": "सेटिंग्स",
+  "set.title": "Telegram जोड़ें",
+  "set.sub":
+    "फ़ोन से कोई भी रिकॉर्ड माँगिए और मूल फ़ाइल डाउनलोड के रूप में पाइए — Chronicle खोले बिना।",
+  "set.connected": "Telegram जुड़ गया",
+  "set.connectedSub": "बॉट को संदेश भेजें और अपने Chronicle से कुछ भी माँगें।",
+  "set.disconnect": "हटाएँ",
+  "set.step1a": "Telegram में",
+  "set.step1b": "Chronicle बॉट",
+  "set.step1c": "खोलें और Start दबाएँ।",
+  "set.step2":
+    "कोड बनाएँ और उसे बॉट को संदेश के रूप में भेजें। यह 15 मिनट में समाप्त होता है और एक ही बार चलता है।",
+  "set.generate": "जोड़ने का कोड बनाएँ",
+  "set.copy": "कॉपी",
+  "set.copied": "कॉपी हो गया",
+  "set.sent": "भेज दिया",
+  "set.warning":
+    "जुड़ा हुआ चैट आपके Chronicle का सब कुछ पढ़ और डाउनलोड कर सकता है, इसलिए केवल अपना चैट जोड़ें। हटाते ही पहुँच तुरंत बंद हो जाती है।",
+  "set.noBot": "इस सर्वर पर कोई बॉट सेट नहीं है।",
+  "set.language": "भाषा",
+  "set.languageSub": "पूरे ऐप पर लागू होती है, और सहायक की बोली पर भी।",
+
+  "cat.Projects": "प्रोजेक्ट",
+  "cat.Skills": "स्किल",
+  "cat.Certifications": "प्रमाणपत्र",
+  "cat.Internships": "इंटर्नशिप",
+  "cat.Achievements": "उपलब्धियाँ",
+  "cat.Academics": "शैक्षणिक",
+  "cat.Other": "अन्य",
+
+  "common.undated": "बिना तारीख़",
+  "common.loading": "लोड हो रहा है…",
+  "common.signIn": "साइन इन करें",
+};
+
+export const dictionaries = { en, hi } as const;

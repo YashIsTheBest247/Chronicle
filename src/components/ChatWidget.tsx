@@ -19,9 +19,9 @@ import {
   speak,
   stopSpeaking,
   warmVoices,
-  type Lang,
 } from "@/lib/speech";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import type { ClientItem } from "@/lib/types";
 
 interface Msg {
@@ -69,7 +69,8 @@ const COPY = {
 
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
-  const [lang, setLang] = useState<Lang>("en");
+  // The widget follows the app-wide language rather than keeping its own.
+  const { lang, setLang } = useT();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -77,9 +78,17 @@ export function ChatWidget() {
   const [voiceOn, setVoiceOn] = useState(true);
   const [needsAuth, setNeedsAuth] = useState(false);
 
+  const [pinged, setPinged] = useState(false);
   const stopListenRef = useRef<(() => void) | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const t = COPY[lang];
+  const c = COPY[lang];
+
+  // The attention pulse runs once per page load and never again — a control
+  // that keeps blinking stops reading as "new" and starts reading as broken.
+  useEffect(() => {
+    const id = window.setTimeout(() => setPinged(true), 2400);
+    return () => window.clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     if (open) warmVoices();
@@ -116,7 +125,7 @@ export function ChatWidget() {
 
       if (res.status === 401) {
         setNeedsAuth(true);
-        setMessages((m) => [...m, { role: "bot", text: t.signIn }]);
+        setMessages((m) => [...m, { role: "bot", text: c.signIn }]);
         return;
       }
 
@@ -129,7 +138,7 @@ export function ChatWidget() {
       ]);
       if (voiceOn) speak(body.answer, lang);
     } catch {
-      setMessages((m) => [...m, { role: "bot", text: t.offline }]);
+      setMessages((m) => [...m, { role: "bot", text: c.offline }]);
     } finally {
       setBusy(false);
     }
@@ -162,15 +171,27 @@ export function ChatWidget() {
     <>
       {/* Launcher */}
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setPinged(true);
+          setOpen((v) => !v);
+        }}
         aria-label={open ? "Close assistant" : "Open assistant"}
         className={cn(
           "fixed right-4 bottom-4 z-50 grid size-14 place-items-center rounded-full",
           "bg-fg text-canvas shadow-[0_14px_38px_-12px_rgb(22_20_15_/_0.55)]",
-          "transition-transform hover:scale-105 active:scale-95 sm:right-6 sm:bottom-6",
+          "transition-transform duration-300 hover:scale-105 active:scale-90",
+          "sm:right-6 sm:bottom-6",
+          !pinged && !open && "launcher-ping",
         )}
       >
-        {open ? <X size={22} /> : <MessageCircle size={22} />}
+        <span className="icon-swap" data-open={open}>
+          <MessageCircle
+            size={22}
+            className={open ? "is-hidden" : "is-shown"}
+            aria-hidden={open}
+          />
+          <X size={22} className={open ? "is-shown" : "is-hidden"} aria-hidden={!open} />
+        </span>
       </button>
 
       {open && (
@@ -178,16 +199,17 @@ export function ChatWidget() {
           className={cn(
             "card fixed right-4 bottom-22 z-50 flex w-[calc(100vw-2rem)] max-w-[24rem] flex-col overflow-hidden p-0",
             "h-[min(34rem,calc(100dvh-8rem))] shadow-[0_28px_70px_-28px_rgb(22_20_15_/_0.5)]",
+            "panel-in",
             "sm:right-6 sm:bottom-24",
           )}
         >
           {/* Header */}
           <div className="flex items-center gap-3 bg-[#16140F] px-4 py-3.5 text-[#EDEBE7]">
             <div className="min-w-0 flex-1">
-              <p className="text-[0.9375rem] font-semibold">{t.title}</p>
+              <p className="text-[0.9375rem] font-semibold">{c.title}</p>
               <p className="flex items-center gap-1.5 text-[0.75rem] text-white/55">
                 <span className="size-1.5 rounded-full bg-[#4CAF7D]" />
-                {t.status}
+                {c.status}
               </p>
             </div>
 
@@ -195,7 +217,7 @@ export function ChatWidget() {
               onClick={() => setLang(lang === "en" ? "hi" : "en")}
               className="rounded-full border border-white/20 px-2.5 py-1 text-[0.75rem] font-medium text-white/80 transition-colors hover:bg-white/10"
             >
-              {t.lang}
+              {c.lang}
             </button>
 
             {canSpeak() && (
@@ -217,7 +239,7 @@ export function ChatWidget() {
             ref={scrollRef}
             className="scrollbar-thin flex-1 space-y-3 overflow-y-auto bg-linen/50 px-4 py-4 dark:bg-mist/20"
           >
-            <Bubble role="bot">{t.greeting}</Bubble>
+            <Bubble role="bot">{c.greeting}</Bubble>
 
             {messages.map((m, i) => (
               <div key={i} className="space-y-2">
@@ -261,7 +283,7 @@ export function ChatWidget() {
 
             {messages.length === 0 && (
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {t.suggestions.map((s) => (
+                {c.suggestions.map((s) => (
                   <button
                     key={s}
                     onClick={() => void send(s)}
@@ -286,7 +308,7 @@ export function ChatWidget() {
               <button
                 type="button"
                 onClick={toggleMic}
-                aria-label={listening ? "Stop listening" : t.speak}
+                aria-label={listening ? "Stop listening" : c.speak}
                 className={cn(
                   "grid size-10 shrink-0 place-items-center rounded-full transition-colors",
                   listening
@@ -301,7 +323,7 @@ export function ChatWidget() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={listening ? t.listening : t.placeholder}
+              placeholder={listening ? c.listening : c.placeholder}
               className="min-w-0 flex-1 bg-transparent text-[0.9375rem] outline-none placeholder:text-faint"
             />
 
@@ -331,7 +353,7 @@ function Bubble({
     <div className={cn("flex", role === "user" && "justify-end")}>
       <div
         className={cn(
-          "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[0.9375rem] leading-relaxed text-pretty",
+          "bubble-in max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[0.9375rem] leading-relaxed text-pretty",
           role === "bot"
             ? "border border-line bg-paper text-fg"
             : "bg-fg text-canvas",

@@ -13,6 +13,7 @@ import {
 import { CategoryPill } from "@/components/CategoryPill";
 import { cn } from "@/lib/utils";
 import type { Item, Relation } from "@/lib/types";
+import { useT } from "@/lib/i18n";
 
 type Status = "pending" | "reading" | "done" | "error";
 
@@ -26,6 +27,7 @@ interface Job {
 }
 
 export default function UploadPage() {
+  const { t } = useT();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [dragging, setDragging] = useState(false);
   const [url, setUrl] = useState("");
@@ -112,14 +114,12 @@ export default function UploadPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <header>
-        <p className="eyebrow">Add to Chronicle</p>
+        <p className="eyebrow">{t("up.eyebrow")}</p>
         <h1 className="t-page mt-2 text-balance">
-          Drop it in. It files itself.
+          {t("up.title")}
         </h1>
         <p className="mt-2 text-[1rem] leading-relaxed text-muted text-pretty">
-          Certificates, résumés, project reports, internship letters,
-          transcripts, portfolio links. PDFs and photos of certificates are read
-          directly — no OCR setup needed.
+          {t("up.sub")}
         </p>
       </header>
 
@@ -145,7 +145,7 @@ export default function UploadPage() {
         </span>
         <div>
           <p className="text-[1rem] font-medium">
-            Drop files here, or click to browse
+            {t("up.drop")}
           </p>
           <p className="mt-1 text-[0.875rem] text-faint">
             PDF, PNG, JPG, DOCX, TXT, MD · up to 20 MB each
@@ -170,7 +170,7 @@ export default function UploadPage() {
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="…or paste a portfolio, GitHub, or LinkedIn URL"
+            placeholder={t("up.url")}
             className="w-full bg-transparent text-[0.9375rem] outline-none placeholder:text-faint"
           />
         </div>
@@ -179,7 +179,7 @@ export default function UploadPage() {
           disabled={!/^https?:\/\//i.test(url.trim())}
           className="btn btn-ghost !py-2.5 disabled:opacity-40"
         >
-          Add
+          {t("up.add")}
         </button>
       </form>
 
@@ -194,7 +194,7 @@ export default function UploadPage() {
                 href="/dashboard"
                 className="inline-flex items-center gap-1 text-[0.875rem] text-muted transition-colors hover:text-fg"
               >
-                Go to overview
+                {t("up.goOverview")}
                 <ArrowRight size={13} />
               </Link>
             )}
@@ -211,6 +211,7 @@ export default function UploadPage() {
 }
 
 function JobRow({ job }: { job: Job }) {
+  const { t } = useT();
   return (
     <div className="card p-4">
       <div className="flex items-start gap-3">
@@ -229,7 +230,7 @@ function JobRow({ job }: { job: Job }) {
 
           {job.status === "reading" && (
             <p className="mt-1 text-[0.9375rem] text-muted">
-              Reading, categorising, and connecting…
+              {t("up.reading")}
             </p>
           )}
 
