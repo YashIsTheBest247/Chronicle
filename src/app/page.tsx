@@ -586,14 +586,28 @@ function Footer() {
 
   return (
     <footer className="relative overflow-hidden bg-[#16140F] text-[#EDEBE7]">
-      {/* Wordmark sits behind the footer and is cropped by the page's bottom
-          edge, so the page still ends at the bottom bar. */}
-      <span
+      {/* Wordmark sits behind the footer, cropped by the page's bottom edge.
+          SVG rather than styled text: `textLength` with `spacingAndGlyphs`
+          forces the word to span the full width at every viewport, which a
+          font-size in vw only ever approximates. */}
+      <svg
         aria-hidden="true"
-        className="watermark bottom-[-0.04em] z-0"
+        viewBox="0 0 1000 200"
+        preserveAspectRatio="xMidYMax meet"
+        className="pointer-events-none absolute inset-x-0 bottom-[-3%] z-0 w-full select-none"
       >
-        Chronicle
-      </span>
+        <text
+          x="500"
+          y="160"
+          textAnchor="middle"
+          textLength="1000"
+          lengthAdjust="spacingAndGlyphs"
+          className="fill-white/[0.055] font-display font-bold"
+          style={{ fontSize: "200px" }}
+        >
+          Chronicle
+        </text>
+      </svg>
 
       <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6">
         {/* Masthead — the wordmark runs full-bleed behind the closing line,

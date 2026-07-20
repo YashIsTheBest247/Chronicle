@@ -129,6 +129,24 @@ export const en = {
     "Chronicle stores the documents you upload so it can hand them back. Sign out any time; deleting a record deletes its original file too.",
 
   // -- dashboard -----------------------------------------------------------
+  "fit.eyebrow": "Opportunity fit",
+  "fit.title": "Paste a job posting. See what you can already prove.",
+  "fit.sub":
+    "Chronicle checks the posting against your own records, cites the ones that satisfy each requirement, and names what is genuinely missing.",
+  "fit.placeholder":
+    "Paste the full job or internship description here…",
+  "fit.cta": "Check my fit",
+  "fit.working": "Reading the posting…",
+  "fit.alsoResume": "Also draft a tailored résumé",
+  "fit.requirementsMet": "requirements backed by your records",
+  "fit.must": "must-have",
+  "fit.closeGaps": "To close the gaps",
+  "fit.resumeTitle": "Résumé, tailored to this role",
+  "fit.resumeNote":
+    "Written only from records you actually hold — reordered and re-emphasised for this posting, never invented.",
+  "fit.grounded":
+    "Every tick is backed by a record you can open. Nothing here is inferred from a CV Chronicle has not read.",
+  "nav.fit": "Fit",
   "dash.eyebrow": "Overview",
   "dash.records": "records",
   "dash.connections": "connections",
@@ -392,6 +410,23 @@ export const hi: Dict = {
   "login.note":
     "Chronicle आपके अपलोड किए दस्तावेज़ इसलिए रखता है ताकि उन्हें लौटा सके। कभी भी साइन आउट करें; रिकॉर्ड मिटाने पर उसकी मूल फ़ाइल भी मिट जाती है।",
 
+  "fit.eyebrow": "अवसर से मेल",
+  "fit.title": "कोई job posting चिपकाइए। देखिए आप क्या साबित कर सकते हैं।",
+  "fit.sub":
+    "Chronicle उस posting को आपके अपने रिकॉर्ड से जाँचता है, हर शर्त के लिए सबूत देता है, और बताता है कि असल में क्या कमी है।",
+  "fit.placeholder": "पूरा job या internship विवरण यहाँ चिपकाएँ…",
+  "fit.cta": "मेरा मेल जाँचें",
+  "fit.working": "posting पढ़ी जा रही है…",
+  "fit.alsoResume": "इस role के लिए résumé भी बनाएँ",
+  "fit.requirementsMet": "शर्तें आपके रिकॉर्ड से सिद्ध",
+  "fit.must": "अनिवार्य",
+  "fit.closeGaps": "कमी पूरी करने के लिए",
+  "fit.resumeTitle": "इस role के अनुसार résumé",
+  "fit.resumeNote":
+    "केवल आपके मौजूद रिकॉर्ड से लिखा गया — इस posting के हिसाब से क्रम और ज़ोर बदला गया है, कुछ गढ़ा नहीं गया।",
+  "fit.grounded":
+    "हर सही का निशान किसी असली रिकॉर्ड पर टिका है जिसे आप खोल सकते हैं। कुछ भी अनुमान से नहीं कहा गया।",
+  "nav.fit": "मेल",
   "dash.eyebrow": "अवलोकन",
   "dash.records": "रिकॉर्ड",
   "dash.connections": "कड़ियाँ",

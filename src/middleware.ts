@@ -20,12 +20,15 @@ export default auth((req) => {
   return NextResponse.redirect(url);
 });
 
+// NOTE: "/p/:path*" is deliberately absent — public profiles must render for
+// signed-out visitors. Everything else that reads account data is listed here.
 export const config = {
   matcher: [
     "/dashboard/:path*",
     "/timeline/:path*",
     "/graph/:path*",
     "/search/:path*",
+    "/fit/:path*",
     "/upload/:path*",
     "/record/:path*",
     "/settings/:path*",

@@ -5,13 +5,48 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 /**
- * The mark is three linked nodes — the smallest possible drawing of the thing
- * Chronicle actually does.
+ * The mark: a continuous ring with three moments set on it, one accented.
  *
- * Clicking it always means "take me to the start". When you are already on
- * the page it points at, a plain <Link> is a no-op, so it scrolls to the top
- * instead.
+ * The ring is time; the nodes are records placed along it, sized by weight.
+ * It reads as an orbit rather than a chart, which keeps it calm at 20px — the
+ * size it is actually used at — where anything more literal turns to mush.
  */
+export function LogoMark({ size = 24 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0 overflow-visible"
+    >
+      {/* Outer orbit, opened at the top-left so it reads as a path with a
+          beginning rather than a closed circle. */}
+      <path
+        d="M8.6 6.4a12 12 0 1 1-2.2 2.2"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.38"
+      />
+      {/* Inner arc — a second, earlier pass around the same track. */}
+      <path
+        d="M16 9.5a6.5 6.5 0 0 1 6.2 8.4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.22"
+      />
+
+      {/* Three moments on the ring, weighted. The accented one is the latest. */}
+      <circle cx="16" cy="4" r="2.75" fill="#2D6BFF" />
+      <circle cx="5.6" cy="22" r="2.15" fill="currentColor" />
+      <circle cx="26.4" cy="22" r="1.7" fill="currentColor" opacity="0.75" />
+    </svg>
+  );
+}
+
 export function Logo({
   className,
   href = "/",
@@ -23,27 +58,8 @@ export function Logo({
 
   const mark = (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden="true"
-        className="shrink-0"
-      >
-        <path
-          d="M6.5 8.5 L12 5 L17.5 8.5 M6.5 8.5 L6.5 15.5 L12 19 L17.5 15.5 L17.5 8.5"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.35"
-        />
-        <circle cx="12" cy="5" r="2.4" fill="#2D6BFF" />
-        <circle cx="6.5" cy="15.5" r="2.4" fill="currentColor" />
-        <circle cx="17.5" cy="15.5" r="2.4" fill="currentColor" />
-      </svg>
-      <span className="font-display text-[1.125rem] font-semibold tracking-tight">
+      <LogoMark size={22} />
+      <span className="font-display text-[1.125rem] font-semibold tracking-[-0.02em]">
         Chronicle
       </span>
     </span>

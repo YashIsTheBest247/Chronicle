@@ -12,6 +12,7 @@ import {
   Moon,
   Search,
   Send,
+  Target,
   Sun,
   Upload,
   Waypoints,
@@ -26,6 +27,7 @@ const TABS = [
   { href: "/timeline", key: "nav.timeline", icon: GitBranch },
   { href: "/graph", key: "nav.graph", icon: Waypoints },
   { href: "/search", key: "nav.search", icon: Search },
+  { href: "/fit", key: "nav.fit", icon: Target },
   { href: "/settings", key: "nav.telegram", icon: Send },
 ] as const;
 
