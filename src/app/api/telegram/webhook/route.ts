@@ -18,9 +18,13 @@ import { getUserByTelegramChat, redeemLinkCode } from "@/lib/users";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-/** How many results to describe, and how many files to push automatically. */
+/**
+ * How many results to describe. Nothing is sent automatically: an unrequested
+ * file download in a chat is intrusive, and the user may have been asking
+ * "which resumes do I have?" rather than "send me one". The answer names what
+ * matched; a button fetches whichever they actually want.
+ */
 const MAX_RESULTS = 5;
-const AUTO_SEND_FILES = 1;
 
 interface TgMessage {
   message_id: number;
@@ -93,7 +97,7 @@ async function handleMessage(msg: TgMessage) {
     await sendMessage(
       chatId,
       linked
-        ? `Linked to <b>${esc(linked.email)}</b>.\n\nAsk me anything about your records — I will send the original files back.`
+        ? `Linked to <b>${esc(linked.email)}</b>.\n\nAsk me anything about your records — I will show what matched and you can download any of it.`
         : "That code is wrong or has expired. Generate a new one in Chronicle under Settings.",
     );
     return;
@@ -122,14 +126,14 @@ async function handleMessage(msg: TgMessage) {
       [
         "<b>Chronicle</b> — your records, on demand.",
         "",
-        "Ask in plain English and I will find the record and send the original file back:",
+        "Ask in plain English and I will find it:",
         "",
         "• <i>show all my certificates</i>",
         "• <i>my latest resume</i>",
         "• <i>what proves I know Python?</i>",
         "• <i>internship documents</i>",
         "",
-        "I send the best match's file automatically; tap a button for any of the others.",
+        "I reply with what matched, then you tap to download whichever file you want.",
       ].join("\n"),
     );
     return;
@@ -174,29 +178,30 @@ async function handleMessage(msg: TgMessage) {
     }),
   ];
 
-  // 2 — a button per record that actually has a stored original.
+  // 2 — one button per record that has a stored original, numbered to match
+  //     the list above so the two read together.
   const withFiles = result.hits.filter((h) => h.item.file);
-  const buttons: InlineButton[][] = withFiles
-    .slice(AUTO_SEND_FILES)
-    .map((h) => [
-      {
-        text: `📎 ${h.item.title.slice(0, 40)}`,
-        // Callback data is capped at 64 bytes — an id fits, a title would not.
-        callback_data: `f:${h.item.id}`,
-      },
-    ]);
+  const buttons: InlineButton[][] = withFiles.map((h) => [
+    {
+      text: `⬇ ${result.hits.indexOf(h) + 1}. ${h.item.title.slice(0, 34)}`,
+      // Callback data is capped at 64 bytes — an id fits, a title would not.
+      callback_data: `f:${h.item.id}`,
+    },
+  ]);
 
-  if (withFiles.length === 0) {
-    lines.push("", "<i>No original files are attached to these records.</i>");
-  }
+  lines.push(
+    "",
+    withFiles.length === 0
+      ? "<i>None of these have an original file attached.</i>"
+      : "<i>Tap one below to download the original.</i>",
+  );
 
-  await sendMessage(chatId, lines.join("\n"), buttons.length ? buttons : undefined);
-
-  // 3 — push the top match's file straight away, so the common case is
-  //     "ask, receive" with no extra tap.
-  for (const hit of withFiles.slice(0, AUTO_SEND_FILES)) {
-    await deliver(user.id, chatId, hit.item.id);
-  }
+  // Nothing is sent unprompted — the user chooses which file they wanted.
+  await sendMessage(
+    chatId,
+    lines.join("\n"),
+    buttons.length ? buttons : undefined,
+  );
 }
 
 async function handleCallback(cb: NonNullable<TgUpdate["callback_query"]>) {

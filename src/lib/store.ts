@@ -44,6 +44,7 @@ function toItem(r: Row): Item {
     // Only selected on the paths that need it; absent elsewhere.
     embedding: parseVector(r.embedding),
     createdAt: new Date(r.created_at as string).toISOString(),
+    hidden: Boolean(r.hidden),
   };
 }
 
@@ -71,7 +72,7 @@ function itemColumns(sql: postgres.Sql) {
   return sql`
     i.id, i.file_id, i.url, i.title, i.summary, i.category, i.date,
     i.date_confidence, i.organization, i.skills, i.tags, i.people,
-    i.links, i.highlights, i.content, i.created_at,
+    i.links, i.highlights, i.content, i.created_at, i.hidden,
     f.id as f_id, f.name as f_name, f.mime as f_mime,
     f.size as f_size, f.uploaded_at as f_uploaded_at
   `;
@@ -245,6 +246,31 @@ export async function getConnections(
 }
 
 // --------------------------------------------------------------- retrieval --
+
+/**
+ * Nearest existing record to a candidate vector, used to catch re-uploads.
+ * Returns the single closest match with its similarity so the caller decides
+ * what counts as "the same document".
+ */
+export async function nearestNeighbour(
+  userId: string,
+  vector: number[],
+): Promise<{ id: string; title: string; similarity: number } | null> {
+  const sql = await db();
+  const [row] = await sql<Row[]>`
+    select id, title, 1 - (embedding <=> ${toVector(vector)}::vector) as similarity
+    from items
+    where user_id = ${userId} and embedding is not null
+    order by embedding <=> ${toVector(vector)}::vector
+    limit 1
+  `;
+  if (!row) return null;
+  return {
+    id: row.id as string,
+    title: row.title as string,
+    similarity: Number(row.similarity),
+  };
+}
 
 export interface VectorFilters {
   categories?: Category[];

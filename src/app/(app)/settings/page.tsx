@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
+import { ProfileCard } from "@/components/ProfileCard";
 
 interface LinkState {
   botConfigured: boolean;
@@ -84,6 +85,8 @@ export default function SettingsPage() {
           {t("set.sub")}
         </p>
       </header>
+
+      <ProfileCard />
 
       {!state ? (
         <div className="card p-6">

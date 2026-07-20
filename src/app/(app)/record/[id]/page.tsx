@@ -11,6 +11,8 @@ import {
   ExternalLink,
   FileText,
   Loader2,
+  Eye,
+  EyeOff,
   Trash2,
 } from "lucide-react";
 import { CategoryPill } from "@/components/CategoryPill";
@@ -45,6 +47,19 @@ export default function RecordPage({
       .then(setData)
       .catch(() => setMissing(true));
   }, [id]);
+
+  async function toggleHidden() {
+    if (!data) return;
+    const next = !data.item.hidden;
+    // Optimistic: the toggle is cheap and reversible, so waiting on the
+    // round-trip would make it feel broken.
+    setData({ ...data, item: { ...data.item, hidden: next } });
+    await fetch(`/api/items/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hidden: next }),
+    }).catch(() => setData({ ...data, item: { ...data.item, hidden: !next } }));
+  }
 
   async function remove() {
     if (!confirm(t("rec.deleteConfirm"))) {
@@ -255,7 +270,15 @@ export default function RecordPage({
         </details>
       )}
 
-      <div className="flex justify-end border-t border-lineSoft pt-5">
+      <div className="flex flex-wrap items-center gap-4 border-t border-lineSoft pt-5">
+        <button
+          onClick={toggleHidden}
+          className="inline-flex items-center gap-1.5 text-[0.875rem] text-muted transition-colors hover:text-fg"
+        >
+          {item.hidden ? <EyeOff size={14} /> : <Eye size={14} />}
+          {item.hidden ? t("profile.show") : t("profile.hide")}
+        </button>
+        <div className="ml-auto" />
         <button
           onClick={remove}
           className="inline-flex items-center gap-1.5 text-[0.875rem] text-faint transition-colors hover:text-[#C0453B]"

@@ -4,6 +4,7 @@ import { toClientItem } from "@/lib/view";
 import { relationLabel } from "@/lib/utils";
 import { apiError } from "@/lib/api-error";
 import { requireUser } from "@/lib/session";
+import { setRecordHidden } from "@/lib/profile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,6 +34,28 @@ export async function GET(
       item: toClientItem(item, 4000),
       connections,
     });
+  } catch (err) {
+    return apiError(err);
+  }
+}
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const session = await requireUser();
+  if ("response" in session) return session.response;
+
+  try {
+    const { id } = await params;
+    const { hidden } = (await req.json()) as { hidden?: boolean };
+    if (typeof hidden !== "boolean") {
+      return NextResponse.json({ error: "Expected { hidden }." }, { status: 400 });
+    }
+    // Scoped by owner inside the query, so this cannot flip another
+    // account's record even with a guessed id.
+    await setRecordHidden(session.userId, id, hidden);
+    return NextResponse.json({ ok: true, hidden });
   } catch (err) {
     return apiError(err);
   }

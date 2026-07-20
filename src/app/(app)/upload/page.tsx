@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
+  Copy,
   ArrowRight,
   Check,
   FileUp,
@@ -23,6 +24,7 @@ interface Job {
   status: Status;
   item?: Item;
   relations?: Relation[];
+  duplicateOf?: { id: string; title: string; similarity: number };
   error?: string;
 }
 
@@ -69,6 +71,7 @@ export default function UploadPage() {
           status: "done",
           item: body.item,
           relations: body.relations,
+          duplicateOf: body.duplicateOf,
         });
       } catch (err) {
         update(key, {
@@ -275,6 +278,19 @@ function JobRow({ job }: { job: Job }) {
 
           {job.status === "done" && job.item && (
             <div className="mt-2 space-y-2.5">
+              {job.duplicateOf && (
+                <p className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#B07A1E]/30 bg-[#B07A1E]/8 px-3 py-2 text-[0.875rem] text-[#8A5F17] dark:text-[#D9A441]">
+                  <Copy size={13} className="shrink-0" />
+                  {t("up.duplicate")}
+                  <Link
+                    href={`/record/${job.duplicateOf.id}`}
+                    className="font-medium underline underline-offset-4"
+                  >
+                    {job.duplicateOf.title}
+                  </Link>
+                </p>
+              )}
+
               <div className="flex flex-wrap items-center gap-2">
                 <CategoryPill category={job.item.category} />
                 {job.relations && job.relations.length > 0 && (

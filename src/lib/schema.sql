@@ -68,6 +68,17 @@ create table if not exists relations (
   constraint relations_pair_unique unique (from_id, to_id)
 );
 
+-- Shareable public profile. A handle is claimed, not derived from the email,
+-- so nobody's address leaks into a public URL.
+alter table users add column if not exists handle text unique;
+alter table users add column if not exists profile_public boolean not null default false;
+alter table users add column if not exists headline text;
+
+-- Lets a record stay in the account but out of the public profile.
+alter table items add column if not exists hidden boolean not null default false;
+
+create index if not exists users_handle_idx on users (handle) where handle is not null;
+
 -- ---------------------------------------------------------------------------
 -- Backfill for databases created before accounts existed. This must run BEFORE
 -- the indexes below, which reference user_id — otherwise index creation fails

@@ -188,6 +188,7 @@ export const en = {
   "up.add": "Add",
   "up.processed": "processed",
   "up.goOverview": "Go to overview",
+  "up.duplicate": "Looks like a duplicate of",
   "up.reading": "Reading, categorising, and connecting…",
   "up.found": "found",
   "up.connectionsFound": "connections found",
@@ -211,6 +212,23 @@ export const en = {
   "rec.approx": "(approx.)",
 
   // -- settings ------------------------------------------------------------
+  "profile.title": "Public profile",
+  "profile.sub":
+    "Share your journey as one link — timeline, skills and connections. Your original files are never included.",
+  "profile.handle": "Your link",
+  "profile.headline": "Headline",
+  "profile.headlinePlaceholder": "Final-year CS student · applied ML and search",
+  "profile.save": "Save",
+  "profile.publish": "Publish profile",
+  "profile.makePrivate": "Make private",
+  "profile.copyLink": "Copy link",
+  "profile.view": "View",
+  "profile.needHandle": "Pick a link first",
+  "profile.privacy":
+    "A public profile shows record titles, categories, dates, skills and connections. It never exposes your uploaded files or their contents. Hide any single record from the record page.",
+  "profile.hidden": "Hidden from profile",
+  "profile.hide": "Hide from public profile",
+  "profile.show": "Show on public profile",
   "set.eyebrow": "Settings",
   "set.title": "Connect Telegram",
   "set.sub":
@@ -429,6 +447,7 @@ export const hi: Dict = {
   "up.add": "जोड़ें",
   "up.processed": "पूरे हुए",
   "up.goOverview": "अवलोकन पर जाएँ",
+  "up.duplicate": "Looks like a duplicate of",
   "up.reading": "पढ़ा जा रहा है, वर्गीकृत और जोड़ा जा रहा है…",
   "up.found": "मिले",
   "up.connectionsFound": "कड़ियाँ मिलीं",
@@ -450,6 +469,23 @@ export const hi: Dict = {
   "rec.backOverview": "अवलोकन पर वापस",
   "rec.approx": "(लगभग)",
 
+  "profile.title": "सार्वजनिक प्रोफ़ाइल",
+  "profile.sub":
+    "अपनी यात्रा एक लिंक में साझा करें — टाइमलाइन, स्किल और कड़ियाँ। आपकी मूल फ़ाइलें कभी शामिल नहीं होतीं।",
+  "profile.handle": "आपका लिंक",
+  "profile.headline": "परिचय पंक्ति",
+  "profile.headlinePlaceholder": "अंतिम वर्ष CS छात्र · applied ML और search",
+  "profile.save": "सहेजें",
+  "profile.publish": "प्रोफ़ाइल प्रकाशित करें",
+  "profile.makePrivate": "निजी करें",
+  "profile.copyLink": "लिंक कॉपी करें",
+  "profile.view": "देखें",
+  "profile.needHandle": "पहले एक लिंक चुनें",
+  "profile.privacy":
+    "सार्वजनिक प्रोफ़ाइल में रिकॉर्ड के नाम, श्रेणी, तारीख़, स्किल और कड़ियाँ दिखती हैं। आपकी अपलोड की गई फ़ाइलें या उनका विषय कभी नहीं दिखता। किसी भी रिकॉर्ड को उसके पेज से छिपाया जा सकता है।",
+  "profile.hidden": "प्रोफ़ाइल से छिपा है",
+  "profile.hide": "सार्वजनिक प्रोफ़ाइल से छिपाएँ",
+  "profile.show": "सार्वजनिक प्रोफ़ाइल पर दिखाएँ",
   "set.eyebrow": "सेटिंग्स",
   "set.title": "Telegram जोड़ें",
   "set.sub":

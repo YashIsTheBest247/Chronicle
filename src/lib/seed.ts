@@ -208,6 +208,7 @@ export async function seed(userId: string): Promise<number> {
     embedding: vectors[i],
     // Stagger createdAt so "recently added" ordering matches the narrative.
     createdAt: new Date(now - (RECORDS.length - i) * 60_000).toISOString(),
+    hidden: false,
   }));
 
   await addItems(userId, items);

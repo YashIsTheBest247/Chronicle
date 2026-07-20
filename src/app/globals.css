@@ -293,9 +293,10 @@
     font-family: var(--font-display);
     font-weight: 700;
     /* Sized against the viewport, not a type scale: this is a full-bleed
-       graphic that should touch both edges at every width. */
-    font-size: 20.5vw;
-    letter-spacing: -0.055em;
+       graphic. Slightly over-sized and tightly tracked so the word runs past
+       both edges — the footer clips it, which is the intended effect. */
+    font-size: 24vw;
+    letter-spacing: -0.065em;
     line-height: 0.78;
     text-align: center;
     color: rgb(255 255 255 / 0.05);

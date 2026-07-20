@@ -70,6 +70,8 @@ export interface Item extends Extraction {
   text: string;
   embedding: number[];
   createdAt: string;
+  /** Kept in the account but excluded from the public profile. */
+  hidden: boolean;
 }
 
 /**
