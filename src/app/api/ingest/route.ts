@@ -13,9 +13,10 @@ export const maxDuration = 60;
  * it fails at the platform edge with FUNCTION_PAYLOAD_TOO_LARGE before this
  * handler ever runs — so the app can only reject it politely by staying under.
  * Self-hosted deployments (Render, a container) have no such cap and can raise
- * this with MAX_UPLOAD_MB.
+ * this with NEXT_PUBLIC_MAX_UPLOAD_MB — the same variable the upload UI
+ * reads, so the limit shown and the limit enforced can never drift apart.
  */
-const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB ?? 4);
+const MAX_UPLOAD_MB = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB ?? 4);
 const MAX_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
 
 export async function POST(req: Request) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -26,12 +26,31 @@ interface Job {
   error?: string;
 }
 
+/** Kept in sync with the server by reading the same variable. */
+const MAX_UPLOAD_MB = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB ?? 4);
+const MAX_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
+
 export default function UploadPage() {
   const { t } = useT();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [dragging, setDragging] = useState(false);
   const [url, setUrl] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const jobsRef = useRef<HTMLElement>(null);
+
+  // Results render below the dropzone, off-screen on most laptops. Bring them
+  // into view as soon as the first file starts processing, so the user sees
+  // work happening instead of an apparently inert page.
+  const jobCount = jobs.length;
+  useEffect(() => {
+    if (jobCount === 0) return;
+    jobsRef.current?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    });
+  }, [jobCount]);
 
   const update = useCallback((key: string, patch: Partial<Job>) => {
     setJobs((prev) =>
@@ -63,6 +82,22 @@ export default function UploadPage() {
 
   const addFiles = useCallback(
     (files: File[]) => {
+      if (files.length === 0) return;
+
+      const tooBig = files.filter((f) => f.size > MAX_BYTES);
+      const ok = files.filter((f) => f.size <= MAX_BYTES);
+      if (tooBig.length) {
+        setJobs((prev) => [
+          ...tooBig.map((f) => ({
+            key: `${Date.now()}-big-${f.name}`,
+            label: f.name,
+            status: "error" as Status,
+            error: `${(f.size / 1024 / 1024).toFixed(1)} MB — over the ${MAX_UPLOAD_MB} MB limit.`,
+          })),
+          ...prev,
+        ]);
+      }
+      files = ok;
       if (files.length === 0) return;
       const created = files.map((file, i) => ({
         key: `${Date.now()}-${i}-${file.name}`,
@@ -148,7 +183,7 @@ export default function UploadPage() {
             {t("up.drop")}
           </p>
           <p className="mt-1 text-[0.875rem] text-faint">
-            PDF, PNG, JPG, DOCX, TXT, MD · up to 20 MB each
+            {t("up.formats")} · {MAX_UPLOAD_MB} MB
           </p>
         </div>
         <input
@@ -184,7 +219,7 @@ export default function UploadPage() {
       </form>
 
       {jobs.length > 0 && (
-        <section className="space-y-3">
+        <section ref={jobsRef} id="jobs" className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="eyebrow">
               {done} of {jobs.length} processed

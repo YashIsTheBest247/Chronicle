@@ -182,7 +182,7 @@ export const en = {
   "up.sub":
     "Certificates, résumés, project reports, internship letters, transcripts, portfolio links. PDFs and photos of certificates are read directly — no OCR setup needed.",
   "up.drop": "Drop files here, or click to browse",
-  "up.formats": "PDF, PNG, JPG, DOCX, TXT, MD",
+  "up.formats": "PDF, PNG, JPG, DOCX, TXT, MD · max",
   "up.url": "…or paste a portfolio, GitHub, or LinkedIn URL",
   "up.add": "Add",
   "up.processed": "processed",
@@ -416,7 +416,7 @@ export const hi: Dict = {
   "up.sub":
     "प्रमाणपत्र, resume, प्रोजेक्ट रिपोर्ट, इंटर्नशिप पत्र, अंकपत्र, पोर्टफोलियो लिंक। PDF और प्रमाणपत्रों की तस्वीरें सीधे पढ़ी जाती हैं — कोई OCR सेटअप नहीं।",
   "up.drop": "फ़ाइलें यहाँ छोड़ें, या क्लिक करके चुनें",
-  "up.formats": "PDF, PNG, JPG, DOCX, TXT, MD",
+  "up.formats": "PDF, PNG, JPG, DOCX, TXT, MD · अधिकतम",
   "up.url": "…या कोई पोर्टफोलियो, GitHub या LinkedIn लिंक चिपकाएँ",
   "up.add": "जोड़ें",
   "up.processed": "पूरे हुए",
