@@ -1,13 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check, Copy, ExternalLink, Globe, Loader2, Lock } from "lucide-react";
+import {
+  Check,
+  Compass,
+  Copy,
+  ExternalLink,
+  Globe,
+  Loader2,
+  Lock,
+} from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 interface Settings {
   handle: string | null;
   isPublic: boolean;
+  listed: boolean;
   headline: string | null;
 }
 
@@ -190,6 +199,27 @@ export function ProfileCard() {
           </>
         )}
       </div>
+
+      {state.isPublic && (
+        <label className="flex cursor-pointer items-start gap-3 border-t border-lineSoft pt-5">
+          <input
+            type="checkbox"
+            checked={state.listed}
+            onChange={(e) => save({ listed: e.target.checked })}
+            disabled={busy}
+            className="mt-0.5 size-4 shrink-0 accent-[#2D6BFF]"
+          />
+          <span className="min-w-0">
+            <span className="flex items-center gap-1.5 text-[0.9375rem] font-medium">
+              <Compass size={14} />
+              {t("profile.listTitle")}
+            </span>
+            <span className="mt-0.5 block text-[0.875rem] leading-relaxed text-muted text-pretty">
+              {t("profile.listSub")}
+            </span>
+          </span>
+        </label>
+      )}
 
       <p className="text-[0.875rem] leading-relaxed text-faint text-pretty">
         {t("profile.privacy")}

@@ -237,6 +237,16 @@ export const en = {
   "rec.approx": "(approx.)",
 
   // -- settings ------------------------------------------------------------
+  "explore.eyebrow": "Explore",
+  "explore.title": "Discover other journeys.",
+  "explore.sub": "Public profiles from people who chose to be listed. Search by name or skill.",
+  "explore.search": "Search by name or skill…",
+  "explore.records": "records",
+  "explore.empty": "No one is listed yet. Publish your profile and opt in to be the first.",
+  "explore.noMatch": "No profiles match that.",
+  "profile.listTitle": "List me in Explore",
+  "profile.listSub": "Appear in the public directory at /explore, searchable by name and skill. Separate from your shareable link — off by default.",
+  "nav.explore": "Explore",
   "profile.title": "Public profile",
   "profile.sub":
     "Share your journey as one link — timeline, skills and connections. Your original files are never included.",
@@ -518,6 +528,16 @@ export const hi: Dict = {
   "rec.backOverview": "अवलोकन पर वापस",
   "rec.approx": "(लगभग)",
 
+  "explore.eyebrow": "खोजें",
+  "explore.title": "दूसरों की यात्राएँ देखें।",
+  "explore.sub": "उन लोगों की सार्वजनिक प्रोफ़ाइलें जिन्होंने सूचीबद्ध होना चुना। नाम या स्किल से खोजें।",
+  "explore.search": "नाम या स्किल से खोजें…",
+  "explore.records": "रिकॉर्ड",
+  "explore.empty": "अभी कोई सूचीबद्ध नहीं है। अपनी प्रोफ़ाइल प्रकाशित करें और पहले बनें।",
+  "explore.noMatch": "इससे कोई प्रोफ़ाइल मेल नहीं खाती।",
+  "profile.listTitle": "मुझे Explore में सूचीबद्ध करें",
+  "profile.listSub": "/explore की सार्वजनिक निर्देशिका में दिखें, नाम और स्किल से खोजने योग्य। आपके साझा लिंक से अलग — डिफ़ॉल्ट रूप से बंद।",
+  "nav.explore": "खोजें",
   "profile.title": "सार्वजनिक प्रोफ़ाइल",
   "profile.sub":
     "अपनी यात्रा एक लिंक में साझा करें — टाइमलाइन, स्किल और कड़ियाँ। आपकी मूल फ़ाइलें कभी शामिल नहीं होतीं।",

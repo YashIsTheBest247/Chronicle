@@ -77,7 +77,15 @@ alter table users add column if not exists headline text;
 -- Lets a record stay in the account but out of the public profile.
 alter table items add column if not exists hidden boolean not null default false;
 
+-- Appearing in the /explore directory is a SEPARATE opt-in from having a
+-- shareable link. Publishing a profile gives you a URL; being listed is a
+-- second, deliberate choice — so nobody who shared a link with one recruiter
+-- is surprised to find themselves in a public list.
+alter table users add column if not exists listed boolean not null default false;
+
 create index if not exists users_handle_idx on users (handle) where handle is not null;
+-- Powers the directory: only rows that are both published and opted-in.
+create index if not exists users_listed_idx on users (listed) where listed = true;
 
 -- ---------------------------------------------------------------------------
 -- Backfill for databases created before accounts existed. This must run BEFORE
@@ -116,5 +124,5 @@ create table if not exists chronicle_meta (
   value text not null
 );
 
-insert into chronicle_meta (key, value) values ('schema_version', '3')
+insert into chronicle_meta (key, value) values ('schema_version', '4')
 on conflict (key) do update set value = excluded.value;

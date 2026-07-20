@@ -165,6 +165,7 @@ export async function getPublicProfile(
 export interface ProfileSettings {
   handle: string | null;
   isPublic: boolean;
+  listed: boolean;
   headline: string | null;
 }
 
@@ -173,11 +174,12 @@ export async function getProfileSettings(
 ): Promise<ProfileSettings> {
   const sql = await db();
   const [row] = await sql<Row[]>`
-    select handle, profile_public, headline from users where id = ${userId}
+    select handle, profile_public, listed, headline from users where id = ${userId}
   `;
   return {
     handle: (row?.handle as string | null) ?? null,
     isPublic: Boolean(row?.profile_public),
+    listed: Boolean(row?.listed),
     headline: (row?.headline as string | null) ?? null,
   };
 }
@@ -192,11 +194,17 @@ export function normaliseHandle(raw: string): string | null {
 const RESERVED = new Set([
   "api", "login", "dashboard", "timeline", "graph", "search", "upload",
   "settings", "record", "admin", "p", "about", "help", "chronicle",
+  "explore", "fit",
 ]);
 
 export async function saveProfileSettings(
   userId: string,
-  args: { handle?: string; isPublic?: boolean; headline?: string },
+  args: {
+    handle?: string;
+    isPublic?: boolean;
+    listed?: boolean;
+    headline?: string;
+  },
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const sql = await db();
 
@@ -222,8 +230,24 @@ export async function saveProfileSettings(
   }
 
   if (args.isPublic !== undefined) {
+    // Going private also delists: a hidden profile has no business in the
+    // public directory, and enforcing it here means the directory query never
+    // has to defend against the impossible state.
     await sql`
-      update users set profile_public = ${args.isPublic} where id = ${userId}
+      update users
+      set profile_public = ${args.isPublic},
+          listed = case when ${args.isPublic} then listed else false end
+      where id = ${userId}
+    `;
+  }
+
+  if (args.listed !== undefined) {
+    // Listing requires a published profile — there is nothing to list
+    // otherwise. The guard is in SQL so a direct API call cannot bypass it.
+    await sql`
+      update users
+      set listed = ${args.listed} and profile_public
+      where id = ${userId}
     `;
   }
 
@@ -248,4 +272,82 @@ export async function setRecordHidden(
     update items set hidden = ${hidden}
     where id = ${itemId} and user_id = ${userId}
   `;
+}
+
+// ---------------------------------------------------------------- directory --
+
+export interface DirectoryEntry {
+  handle: string;
+  name: string | null;
+  image: string | null;
+  headline: string | null;
+  records: number;
+  skills: string[];
+}
+
+/**
+ * The /explore directory: everyone who both published a profile and opted in.
+ *
+ * Like the public profile, this selects only presentational columns and is
+ * scoped by `listed AND profile_public` — the two flags together, so a stale
+ * `listed` on a since-unpublished profile can never surface. `query` filters
+ * on name, handle, headline and skills.
+ */
+export async function listDirectory(query?: string): Promise<DirectoryEntry[]> {
+  const sql = await db();
+  const q = query?.trim().toLowerCase();
+
+  // Aggregate records and skills in a subquery, each grouped once. Doing both
+  // in one join multiplied the record count by the number of skills, because
+  // unnest produces a row per skill — so a 2-skill record counted as 2.
+  const rows = await sql<Row[]>`
+    select
+      u.handle, u.name, u.image, u.headline,
+      coalesce(agg.records, 0) as records,
+      coalesce(agg.skills, '{}') as skills
+    from users u
+    left join (
+      select
+        i.user_id,
+        -- distinct i.id, not count(*): the lateral unnest emits one row per
+        -- skill, so count(*) would tally skills, not records.
+        count(distinct i.id)::int as records,
+        coalesce(
+          (array_agg(distinct s) filter (where s is not null)),
+          '{}'
+        ) as skills
+      from items i
+      left join lateral unnest(i.skills) as s on true
+      where i.hidden = false
+      group by i.user_id
+    ) agg on agg.user_id = u.id
+    where u.listed = true and u.profile_public = true
+    order by coalesce(agg.records, 0) desc, u.handle asc
+  `;
+
+  const all: DirectoryEntry[] = rows.map((r) => ({
+    handle: r.handle as string,
+    name: (r.name as string | null) ?? null,
+    image: (r.image as string | null) ?? null,
+    headline: (r.headline as string | null) ?? null,
+    records: Number(r.records),
+    // Cap the chips shown per card; the profile page has the full list.
+    skills: ((r.skills as string[]) ?? []).slice(0, 8),
+  }));
+
+  if (!q) return all;
+
+  // Filtering in JS keeps the SQL one clean statement; the directory is small
+  // enough (published + opted-in profiles) that this is not a scaling concern.
+  return all.filter((e) => {
+    const hay = [
+      e.name ?? "",
+      e.handle,
+      e.headline ?? "",
+      ...e.skills,
+    ]
+      .join(" ")
+      .toLowerCase();
+    return hay.includes(q);
+  });
 }

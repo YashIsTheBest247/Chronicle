@@ -15,6 +15,7 @@ import {
   Settings,
   Sun,
   Target,
+  Compass,
   Upload,
   Waypoints,
   X,
@@ -30,6 +31,7 @@ const TABS = [
   { href: "/graph", key: "nav.graph", icon: Waypoints },
   { href: "/search", key: "nav.search", icon: Search },
   { href: "/fit", key: "nav.fit", icon: Target },
+  { href: "/explore", key: "nav.explore", icon: Compass },
   { href: "/settings", key: "nav.telegram", icon: Send },
 ] as const;
 

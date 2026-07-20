@@ -14,7 +14,7 @@ import postgres from "postgres";
  * stored in `chronicle_meta`, and the DDL only runs when the database is
  * behind — so a migration that is not accompanied by a bump will not apply.
  */
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 
 let client: postgres.Sql | null = null;
 let migration: Promise<void> | null = null;

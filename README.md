@@ -178,8 +178,9 @@ src/
   app/
     (app)/          dashboard · timeline · graph · search · upload · fit · settings · record
     api/            ingest · search · chat · fit · items · graph · timeline
-                    file · profile · public · telegram · auth
-    p/[handle]/     public profile (the only unauthenticated page)
+                    file · profile · public · directory · telegram · auth
+    explore/        public directory of opted-in profiles
+    p/[handle]/     public profile
     login/
   lib/
     gemini.ts       model calls and embeddings
