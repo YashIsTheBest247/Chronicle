@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ArrowUpRight, Calendar, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Calendar, Sparkles } from "lucide-react";
 import { getPublicProfile } from "@/lib/profile";
 import { Logo } from "@/components/Logo";
 import { formatDate } from "@/lib/utils";
@@ -63,6 +63,17 @@ export default async function PublicProfilePage({
       </header>
 
       <main className="mx-auto max-w-4xl px-5 py-12 sm:py-16">
+        {/* Back to the directory — the discovery path in, and the natural place
+            to browse on to another profile. Always /explore, since a visitor
+            may have arrived from a shared link with no in-app history. */}
+        <Link
+          href="/explore"
+          className="mb-8 inline-flex items-center gap-1.5 text-[0.9375rem] text-muted transition-colors hover:text-fg"
+        >
+          <ArrowLeft size={16} />
+          Back to directory
+        </Link>
+
         {/* Identity */}
         <div className="flex flex-wrap items-center gap-5">
           {profile.image && (
