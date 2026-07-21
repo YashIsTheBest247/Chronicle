@@ -44,7 +44,8 @@ const TABS = [
  */
 export function AppNav() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const signedOut = status === "unauthenticated";
   const [dark, setDark] = useState(false);
   const [account, setAccount] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -119,15 +120,22 @@ export function AppNav() {
               <LanguageSwitch compact />
             </span>
 
-            <Link
-              href="/upload"
-              className="btn btn-primary !px-4 !py-2.5 sm:!px-5"
-            >
-              <Upload size={14} />
-              <span className="hidden sm:inline">{t("nav.add")}</span>
-            </Link>
+            {signedOut ? (
+              <Link href="/login" className="btn btn-primary !px-4 !py-2.5 sm:!px-5">
+                {t("common.signIn")}
+              </Link>
+            ) : (
+              <Link
+                href="/upload"
+                className="btn btn-primary !px-4 !py-2.5 sm:!px-5"
+              >
+                <Upload size={14} />
+                <span className="hidden sm:inline">{t("nav.add")}</span>
+              </Link>
+            )}
 
             {/* Account — the only place to sign out. */}
+            {!signedOut && (
             <div className="relative hidden lg:block">
               <button
                 onClick={() => setAccount((v) => !v)}
@@ -165,6 +173,7 @@ export function AppNav() {
                 </>
               )}
             </div>
+            )}
 
             {/* Hamburger — every destination lives here below lg. */}
             <button
@@ -183,9 +192,11 @@ export function AppNav() {
 
         {menu && (
           <div className="card panel-in mt-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto p-2 lg:hidden">
-            <div className="border-b border-lineSoft px-3 pt-1 pb-3">
-              <AccountBlock session={session} t={t} />
-            </div>
+            {!signedOut && (
+              <div className="border-b border-lineSoft px-3 pt-1 pb-3">
+                <AccountBlock session={session} t={t} />
+              </div>
+            )}
 
             <nav className="mt-2 grid gap-0.5">
               {TABS.map(({ href, key, icon: Icon }) => {
@@ -219,13 +230,22 @@ export function AppNav() {
               <LanguageSwitch />
             </div>
 
-            <button
+            {signedOut ? (
+              <Link
+                href="/login"
+                className="btn btn-primary mt-2 w-full"
+              >
+                {t("common.signIn")}
+              </Link>
+            ) : (
+              <button
               onClick={() => signOut({ redirectTo: "/" })}
               className="mt-2 flex w-full items-center gap-2.5 rounded-2xl px-3 py-3 text-left text-[1rem] text-muted hover:bg-mist hover:text-fg"
             >
               <LogOut size={17} />
               {t("nav.signOut")}
             </button>
+            )}
           </div>
         )}
       </div>
