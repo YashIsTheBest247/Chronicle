@@ -282,9 +282,9 @@ export const en = {
   "set.copied": "Copied",
   "set.sent": "I've sent it",
   "set.howTitle": "How it works once connected",
-  "set.how1": "Message the bot in plain English — “show my certificates”, “my latest resume”, “what proves I know Python?”",
+  "set.how1": "Message the bot in plain English — “show my certificates”, “my latest resume”, “what's the link to my portfolio?”",
   "set.how2": "It searches your Chronicle and replies with a one-line answer plus what matched.",
-  "set.how3": "The best match's original file arrives as a download. Tap a button for any of the others.",
+  "set.how3": "Tap ⬇ on a record for the original file, or 🔗 for its links — each one labelled with what it is. Ask for a link and you get the URL straight away.",
   "set.how4": "Hindi works too — ask in Hindi and it answers in Hindi, even for English documents.",
   "set.stepsTitle": "Connect in three steps",
   "set.warning":
@@ -575,9 +575,9 @@ export const hi: Dict = {
   "set.copied": "कॉपी हो गया",
   "set.sent": "भेज दिया",
   "set.howTitle": "जुड़ने के बाद यह कैसे काम करता है",
-  "set.how1": "बॉट को आम भाषा में लिखें — “मेरे प्रमाणपत्र दिखाओ”, “मेरा नवीनतम resume”, “क्या साबित करता है कि मुझे Python आती है?”",
+  "set.how1": "बॉट को आम भाषा में लिखें — “मेरे प्रमाणपत्र दिखाओ”, “मेरा नवीनतम resume”, “मेरे पोर्टफोलियो का लिंक क्या है?”",
   "set.how2": "वह आपका Chronicle खोजकर एक पंक्ति में जवाब देता है, साथ में जो मिला वह भी।",
-  "set.how3": "सबसे मिलती-जुलती फ़ाइल डाउनलोड के रूप में आ जाती है। बाकी के लिए बटन दबाएँ।",
+  "set.how3": "किसी रिकॉर्ड पर ⬇ दबाएँ और मूल फ़ाइल मिलेगी, या 🔗 दबाएँ और उसके लिंक — हर लिंक के साथ यह भी कि वह किस चीज़ का है। लिंक पूछते ही URL सीधे मिल जाता है।",
   "set.how4": "हिंदी भी चलती है — हिंदी में पूछिए, हिंदी में जवाब मिलेगा, चाहे दस्तावेज़ अंग्रेज़ी में हों।",
   "set.stepsTitle": "तीन चरणों में जोड़ें",
   "set.warning":

@@ -227,7 +227,7 @@ async function handleMessage(msg: TgMessage) {
   // as a link question but is often a request for the file, so a record with
   // no links falls through to the normal digest rather than a dead end.
   if (asked && anyLinks) {
-    await sendLinkAnswer(chatId, result.answer, items);
+    await sendLinkAnswer(chatId, items);
     return;
   }
 
@@ -336,20 +336,19 @@ function fit(
 /**
  * Answers a question about links with the URLs themselves, labelled. Called
  * only when at least one matched record has a link.
+ *
+ * The search layer's one-line answer is deliberately left out. It summarises
+ * records, not links, and on a query like "my links" it can come back with
+ * "no records were found that mention links" — directly above the links it
+ * found. The count below is the answer.
  */
-async function sendLinkAnswer(
-  chatId: number,
-  answer: string,
-  items: ItemWithFile[],
-) {
+async function sendLinkAnswer(chatId: number, items: ItemWithFile[]) {
   const found = items
     .map((item) => ({ item, links: linksFor(item) }))
     .filter((r) => r.links.length > 0);
 
   const total = found.reduce((n, r) => n + r.links.length, 0);
   const header = [
-    esc(answer),
-    "",
     `🔗 <b>${total} link${total === 1 ? "" : "s"}</b> across ${found.length} record${
       found.length === 1 ? "" : "s"
     }:`,

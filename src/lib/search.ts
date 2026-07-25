@@ -248,13 +248,29 @@ async function summarise(query: string, hits: SearchResult["hits"]): Promise<str
       `Question: ${query}\n\nMatching records:\n${context}`,
       `You answer a student's question about their own records in one or two sentences.
 
+The records listed are the result — they were retrieved for this question and they are being shown to the user underneath your sentence. Never say nothing was found, and never say the records do not mention the question's wording: describe what they are instead. If they only loosely fit the question, say what they are and let the user judge.
+
 Speak directly and factually about what was found. Reference the records by name where it helps. Never invent a record that is not listed. Do not begin with "Based on" or "I found". No markdown.`,
     );
-    return text.trim() || fallbackAnswer(hits);
+    const answer = text.trim();
+    // A summary that denies what is about to be listed is worse than no
+    // summary. The model still does this on queries whose wording appears
+    // nowhere in the records — "my links", "anything from 2019" — so the
+    // denial is replaced rather than shown above the results it contradicts.
+    return !answer || DENIAL.test(answer) ? fallbackAnswer(hits) : answer;
   } catch {
     return fallbackAnswer(hits);
   }
 }
+
+/**
+ * Phrasings that contradict a non-empty result set, in the two orders the
+ * model writes them: "no records mention X", and "your records do not
+ * mention X". Nouns are word-bounded so "No date is recorded" — a legitimate
+ * thing to say about a record — is not read as a denial.
+ */
+const DENIAL =
+  /\b(?:no|none of|nothing|not any|couldn'?t find|could not find|unable to find)\b[^.]{0,25}\b(?:records?|documents?|files?|certificates?|results?|matches|links?|mentions?)\b|\b(?:records?|documents?|files?|certificates?)\b[^.]{0,30}\b(?:do(?:es)? not|don'?t|doesn'?t)\b[^.]{0,20}\b(?:mention|contain|include|match|show|have)\b/i;
 
 function fallbackAnswer(hits: SearchResult["hits"]): string {
   const n = hits.length;

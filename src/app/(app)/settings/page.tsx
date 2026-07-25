@@ -86,8 +86,8 @@ export default function SettingsPage() {
         </p>
       </header>
 
-      <ProfileCard />
-
+      {/* Connecting the bot is what this page is titled for, so it leads.
+          Publishing a profile is a separate decision and sits below it. */}
       {!state ? (
         <div className="card p-6">
           <div className="skeleton h-5 w-48" />
@@ -238,6 +238,8 @@ export default function SettingsPage() {
           )}
         </ul>
       </div>
+
+      <ProfileCard />
 
       <div className="card flex flex-wrap items-center gap-4 p-6">
         <div className="min-w-0 flex-1">
