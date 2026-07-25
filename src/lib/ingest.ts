@@ -53,8 +53,16 @@ export async function ingestUrl(
   userId: string,
   url: string,
 ): Promise<IngestResult> {
-  const { text, extraction } = await extractFromUrl(url);
-  return finish(userId, { extraction, text, fileId: null, url });
+  const { text, extraction, file } = await extractFromUrl(url);
+
+  // A link that resolved to an actual document — a shared Drive PDF, a
+  // directly linked certificate — is stored exactly like an upload. The record
+  // keeps both: the URL it came from, and bytes that survive the link rotting.
+  const stored = file
+    ? await saveFile(userId, nanoid(12), file.name, file.mime, file.bytes)
+    : null;
+
+  return finish(userId, { extraction, text, fileId: stored?.id ?? null, url });
 }
 
 async function finish(userId: string, args: {

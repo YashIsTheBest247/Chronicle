@@ -1,5 +1,6 @@
 import "server-only";
 import { generateJSON } from "./gemini";
+import { classifyLink } from "./links";
 import { CATEGORIES, type Category, type Extraction } from "./types";
 
 /** Formats Gemini reads natively as binary — no local parsing needed. */
@@ -82,6 +83,12 @@ Rules:
 export interface ExtractResult {
   text: string;
   extraction: Extraction;
+  /**
+   * Present when a URL turned out to point at a document rather than a page —
+   * a shared Google Drive PDF, a directly linked certificate. Ingest stores it
+   * like an upload: the link may stop resolving, the bytes will not.
+   */
+  file?: { name: string; mime: string; bytes: Buffer };
 }
 
 /**
@@ -148,26 +155,211 @@ Transcribe this document to plain text. Preserve headings, bullet points and req
   return (await toText(name, mime, bytes)).trim();
 }
 
-/** Extracts a record from a pasted URL — portfolio, GitHub repo, profile. */
+/** Bytes a linked document may occupy before it is read for text only. */
+const MAX_LINKED_BYTES = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB ?? 4) * 1024 * 1024;
+
+/** Document types worth keeping a copy of, as opposed to reading and dropping. */
+const STORABLE_MIME =
+  /^(application\/pdf|image\/(png|jpe?g|webp|heic|heif)|application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document|application\/msword)/i;
+
+/**
+ * A page that answered but said nothing: a sign-in wall, a permission prompt,
+ * or a JavaScript shell that renders its content client-side. Feeding this to
+ * the model produces a record titled "Sign in - Google Accounts", which is
+ * worse than admitting the page could not be read.
+ */
+const UNREADABLE =
+  /(sign in|sign up|log in to continue|you need (permission|access)|request access|access denied|enable javascript|javascript is (required|disabled)|are you a robot|verify you are human|403 forbidden|404|not found)/i;
+
+/**
+ * Extracts a record from a pasted URL — portfolio, GitHub repo, profile,
+ * Google Drive file, or anything else with an address.
+ *
+ * Three outcomes, in order of preference:
+ *   1. The link resolves to a document (a shared Drive PDF, a linked
+ *      certificate) — it is read as a file and kept.
+ *   2. The link resolves to a readable page — its text is extracted.
+ *   3. The link cannot be read at all — a record is still created from what
+ *      the URL itself says, so nothing a user adds is silently rejected.
+ */
 export async function extractFromUrl(url: string): Promise<ExtractResult> {
-  let page = "";
-  try {
-    const res = await fetch(url, {
-      headers: { "User-Agent": "Chronicle/0.1 (+student portfolio indexer)" },
-      signal: AbortSignal.timeout(15_000),
-    });
-    if (res.ok) page = stripHtml(await res.text()).slice(0, 40_000);
-  } catch {
-    // A dead or blocked link still yields a usable record from the URL itself.
+  const fetched = await fetchLink(url);
+
+  // 1 — a real document behind the link.
+  if (fetched?.kind === "document") {
+    const { name, mime, bytes } = fetched;
+    try {
+      const result = await extractFromFile({ name, mime, bytes });
+      return {
+        ...result,
+        extraction: withLink(result.extraction, url),
+        // Only worth storing if it is the kind of thing someone would ask for
+        // back. A text export of a Google Doc is not; the PDF behind it is.
+        file: STORABLE_MIME.test(mime) ? { name, mime, bytes } : undefined,
+      };
+    } catch {
+      // Unreadable bytes — fall through to describing the link itself.
+    }
   }
 
+  // 2 — a readable page.
+  const page = fetched?.kind === "page" ? fetched.text : "";
+  if (page) {
+    const extraction = await runExtraction({
+      prompt: `URL: ${url}\n\nPage contents:\n"""\n${page}\n"""\n\nExtract the structured record for this link.`,
+    });
+    return { text: page, extraction: withLink(extraction, url) };
+  }
+
+  // 3 — nothing readable. The URL still carries a platform, an owner and often
+  //     a project name, and `classifyLink` already knows what kind of thing it
+  //     points at, so the model is told that rather than left to guess.
+  const { label } = classifyLink(url);
   const extraction = await runExtraction({
-    prompt: page
-      ? `URL: ${url}\n\nPage contents:\n"""\n${page}\n"""\n\nExtract the structured record for this link.`
-      : `URL: ${url}\n\nThe page could not be fetched. Infer what you reasonably can from the URL structure alone, and keep dateConfidence "unknown".`,
+    prompt: `URL: ${url}
+
+This link points at: ${label}
+
+The page itself could not be read — it may require sign-in, or render entirely in the browser. Describe the record from the URL alone: name it after what the link points at, never after an error page, and keep dateConfidence "unknown". Leave organization empty unless the URL names one.`,
   });
+  return { text: url, extraction: withLink(extraction, url) };
+}
+
+/** The record's own URL belongs in its links, listed first. */
+function withLink(extraction: Extraction, url: string): Extraction {
   if (!extraction.links.includes(url)) extraction.links.unshift(url);
-  return { text: page || url, extraction };
+  return extraction;
+}
+
+type Fetched =
+  | { kind: "document"; name: string; mime: string; bytes: Buffer }
+  | { kind: "page"; text: string }
+  | null;
+
+/**
+ * Fetches a link and decides what came back. Google's document hosts are
+ * rewritten to their export endpoints first: a Drive share URL serves a
+ * JavaScript shell to a bot, while the same file's download URL serves the
+ * actual PDF.
+ */
+async function fetchLink(url: string): Promise<Fetched> {
+  const target = exportUrl(url) ?? url;
+
+  let res: Response;
+  try {
+    res = await fetch(target, {
+      redirect: "follow",
+      headers: { "User-Agent": "Chronicle/0.1 (+student portfolio indexer)" },
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!res.ok) return null;
+  } catch {
+    return null;
+  }
+
+  const mime = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+  const isHtml = !mime || /html|xml$/.test(mime);
+
+  let bytes: Buffer;
+  try {
+    const buf = await res.arrayBuffer();
+    if (buf.byteLength === 0 || buf.byteLength > MAX_LINKED_BYTES) return null;
+    bytes = Buffer.from(buf);
+  } catch {
+    return null;
+  }
+
+  if (!isHtml) {
+    return { kind: "document", name: filenameFor(res, target, mime), mime, bytes };
+  }
+
+  const text = stripHtml(bytes.toString("utf8")).slice(0, 40_000);
+  if (text.length < 250) return null;
+  // A wall is short by nature — a real page keeps going. Testing length first
+  // matters: plenty of readable pages carry a "Sign in" link in their own
+  // navigation, and GitHub is one of them.
+  if (text.length < 3_000 && UNREADABLE.test(text)) return null;
+  return { kind: "page", text };
+}
+
+/**
+ * Rewrites Google's viewer URLs to the endpoint that serves the file itself.
+ * Only these are special-cased: every other host serves something readable at
+ * the URL the user pasted.
+ */
+function exportUrl(url: string): string | null {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return null;
+  }
+  const host = u.hostname.replace(/^www\./, "").toLowerCase();
+
+  if (host === "drive.google.com") {
+    // /file/d/<id>/view, /open?id=<id>, /uc?id=<id>
+    const id = u.pathname.match(/\/d\/([\w-]{10,})/)?.[1] ?? u.searchParams.get("id");
+    return id ? `https://drive.google.com/uc?export=download&id=${id}` : null;
+  }
+
+  if (host === "docs.google.com") {
+    const [, kind, id] =
+      u.pathname.match(/\/(document|spreadsheets|presentation)\/d\/([\w-]{10,})/) ?? [];
+    if (!id) return null;
+    if (kind === "spreadsheets")
+      return `https://docs.google.com/spreadsheets/d/${id}/export?format=csv`;
+    if (kind === "presentation")
+      return `https://docs.google.com/presentation/d/${id}/export/txt`;
+    return `https://docs.google.com/document/d/${id}/export?format=txt`;
+  }
+
+  return null;
+}
+
+/** A name for a downloaded document: the server's, the URL's, or the host's. */
+function filenameFor(res: Response, url: string, mime: string): string {
+  const disposition = res.headers.get("content-disposition") ?? "";
+  const named =
+    /filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1] ??
+    /filename="?([^";]+)"?/i.exec(disposition)?.[1];
+  if (named) return safeName(named);
+
+  try {
+    const u = new URL(url);
+    const last = u.pathname.split("/").filter(Boolean).pop();
+    if (last && /\.[a-z0-9]{2,5}$/i.test(last)) return safeName(last);
+    const ext = mime.split("/")[1]?.replace(/^vnd\..*/, "docx") ?? "bin";
+    return `${u.hostname.replace(/^www\./, "")}.${ext}`;
+  } catch {
+    return "linked-document";
+  }
+}
+
+// Named rather than written inline: a backslash and a DEL inside a character
+// class are exactly the kind of escape that gets mangled when this file is
+// edited by a tool.
+const PATH_SEP = String.fromCharCode(92);
+const DEL = String.fromCharCode(127);
+
+/**
+ * A filename from a remote header is untrusted input that ends up in a
+ * multipart upload to Telegram, so separators and control characters are
+ * dropped rather than escaped.
+ */
+function safeName(raw: string): string {
+  let name = raw.trim();
+  try {
+    name = decodeURIComponent(name);
+  } catch {
+    // Malformed percent-encoding — the raw form is still a usable name.
+  }
+  const cleaned = [...name]
+    .map((c) => (c === "/" || c === PATH_SEP ? "-" : c))
+    // Control characters and quotes would break the multipart upload.
+    .filter((c) => c >= " " && c !== '"' && c !== DEL)
+    .join("")
+    .trim();
+  return cleaned.slice(0, 120) || "linked-document";
 }
 
 async function runExtraction(args: {

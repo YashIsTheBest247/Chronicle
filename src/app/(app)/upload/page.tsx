@@ -32,6 +32,15 @@ interface Job {
 const MAX_UPLOAD_MB = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB ?? 4);
 const MAX_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
 
+/**
+ * Only enough to enable the button. The scheme is optional because a copied
+ * address often arrives without one, and the server normalises it anyway —
+ * whether the link is actually reachable is the ingest step's business.
+ */
+function looksLikeUrl(value: string): boolean {
+  return /^(https?:\/\/)?[a-z0-9-]+(\.[a-z0-9-]{2,})+([/?#]|$)/i.test(value.trim());
+}
+
 export default function UploadPage() {
   const { t } = useT();
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -131,7 +140,7 @@ export default function UploadPage() {
   function addUrl(e: React.FormEvent) {
     e.preventDefault();
     const value = url.trim();
-    if (!/^https?:\/\//i.test(value)) return;
+    if (!looksLikeUrl(value)) return;
     const key = `${Date.now()}-url`;
     setJobs((prev) => [
       { key, label: value, status: "pending" as Status },
@@ -214,7 +223,7 @@ export default function UploadPage() {
         </div>
         <button
           type="submit"
-          disabled={!/^https?:\/\//i.test(url.trim())}
+          disabled={!looksLikeUrl(url)}
           className="btn btn-ghost !py-2.5 disabled:opacity-40"
         >
           {t("up.add")}

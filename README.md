@@ -19,7 +19,7 @@ Telegram.
 
 | Module | What happens |
 |---|---|
-| **1 · Ingestion** | PDFs, photos of certificates, DOCX, transcripts, portfolio links. Scans are read natively by Gemini — no OCR step to configure. |
+| **1 · Ingestion** | PDFs, photos of certificates, DOCX, transcripts — and **any link**: a portfolio, a GitHub repo, a Google Drive file, a credential page. Scans are read natively by Gemini — no OCR step to configure. |
 | **2 · Categorisation** | Every upload is classified into Projects, Skills, Certifications, Internships, Achievements or Academics. You never file anything by hand. |
 | **3 · Relationship engine** | A certification *proves* a skill; a skill is *applied in* a project; a project *led to* an internship. The graph assembles itself. |
 | **4 · Timeline** | A year-by-year journey built from the dates found *inside* your documents, not file timestamps. |
@@ -28,7 +28,8 @@ Telegram.
 ### Beyond the brief
 
 - **Opportunity Fit** — paste or upload a job posting; Chronicle scores your fit and **cites your own records** as proof of each requirement, then names what's genuinely missing. Optionally drafts a résumé from the records that matched.
-- **Telegram bot** — ask from your phone, get the original PDF back as a download.
+- **Telegram bot** — ask from your phone, get the original PDF back as a download, or the link you stored back **labelled with what it is**.
+- **Links as records** — paste any address and it is read, categorised and connected like a file. Ask for it later and you get the URL itself, not a filename.
 - **Public profile** — `/p/<handle>`, a shareable read-only view of your journey that never exposes your files.
 - **Bilingual** — full English/Hindi UI, and Hindi questions match English documents.
 - **Voice** — speak your question, hear the answer.
@@ -132,6 +133,74 @@ Do **not** use Render's free Postgres — it is deleted 30 days after creation.
 2. **Settings → Activate bot** (registers the webhook)
 3. Generate a 6-character code and send it to the bot to link your chat
 
+| Send | You get |
+|---|---|
+| any question | the answer, what matched, and a button per record: ⬇ for the original file, 🔗 for its links |
+| a question about a link | the URLs themselves, each labelled — *GitHub repository*, *Live demo*, *Credential* |
+| `/links` | every link in your Chronicle, grouped by the record it belongs to |
+| `/help` | what to try |
+| `/link ABC123` | re-link this chat to a different account |
+
+A chat reaches exactly one account, enforced by a unique constraint. The
+6-character code is only read as a code while the chat is **unlinked** — once
+linked, `resume` and `python` are questions, not expired codes.
+
+---
+
+## Links: any address in, labelled answers out
+
+A record can hold several URLs — the one you added, plus every URL found inside
+the document. So *"send me the link"* is ambiguous by default: a project might
+have a repository, a deployed demo and a demo video. Chronicle names each one.
+
+**Adding.** Paste any address into the Upload page; the scheme is optional.
+What happens next depends on what is actually behind it:
+
+| Behind the link | What Chronicle does |
+|---|---|
+| A document — a shared Drive PDF, a linked certificate | Reads it as a file **and keeps the bytes**, so the record survives the link rotting |
+| A readable page — portfolio, repo, profile, article | Extracts the record from the page text |
+| A sign-in wall, a JavaScript shell, a dead host | Still creates the record from what the URL itself says — nothing you add is rejected |
+
+Google's viewer URLs are rewritten to their export endpoints before fetching, because
+a Drive share URL serves a bot a JavaScript shell while the same file's download
+URL serves the actual PDF:
+
+```
+drive.google.com/file/d/<id>/view       →  uc?export=download&id=<id>     (the file)
+docs.google.com/document/d/<id>/edit    →  /export?format=txt             (the text)
+docs.google.com/spreadsheets/d/<id>     →  /export?format=csv
+docs.google.com/presentation/d/<id>     →  /export/txt
+```
+
+A page that answers but says nothing — *"Sign in"*, *"You need permission"* —
+is treated as unread, because a record titled *"Sign in - Google Accounts"* is
+worse than one inferred from the URL. Length is checked before wording: plenty
+of readable pages carry a "Sign in" link in their own navigation, and GitHub is
+one of them.
+
+**Asking.** Every URL is labelled from its host and path — GitHub repository vs
+GitHub profile vs GitHub Pages site are three different answers — so a reply
+tells you what each link is *for*:
+
+```
+🔗 3 links across 2 records:
+
+Placement Dashboard — Projects · 2024
+    💻 GitHub repository
+    https://github.com/you/placement-dashboard
+    🌐 Live demo
+    https://placement-dashboard.vercel.app
+
+AWS Cloud Practitioner — Certifications · Amazon · Mar 2024
+    🎓 Credential
+    https://www.credly.com/badges/…
+```
+
+Unrecognised hosts fall back to the hostname, which is still what you would
+recognise. Duplicates differing only by scheme, `www.` or a trailing slash
+collapse into one.
+
 ---
 
 ## How retrieval actually works
@@ -185,7 +254,8 @@ src/
   lib/
     gemini.ts       model calls and embeddings
     keyring.ts      rotating key pool with failover
-    extract.ts      document → structured record (and transient text for JDs)
+    extract.ts      document or URL → structured record (transient text for JDs)
+    links.ts        URL normalisation, labelling, and link-question detection
     relate.ts       two-pass relationship engine
     search.ts       hybrid retrieval
     fit.ts          job-posting assessment with cited evidence
@@ -203,7 +273,8 @@ src/
 - Ownership is checked in the `WHERE` clause, not in JavaScript after fetching.
 - Public profiles select an explicit column list — never `content`, never `file_id`. There is no code path from a public URL to a stored file.
 - Job descriptions uploaded for a fit check are read into memory and discarded. That route imports `extractPlainText`, never the ingest pipeline.
-- A Telegram chat reaches exactly one account, enforced by a unique constraint.
+- A Telegram chat reaches exactly one account, enforced by a unique constraint. Both the file and the link callbacks resolve the record by `(userId, id)`, so a guessed id returns nothing.
+- Added links are refused if they point at a loopback, private, link-local or multicast host — the server fetches whatever URL a record is created from, and that must not become a way to reach inside the network it runs in.
 
 ---
 

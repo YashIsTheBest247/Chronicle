@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ingestFile, ingestUrl } from "@/lib/ingest";
 import { hasKey } from "@/lib/gemini";
 import { hasDatabase } from "@/lib/db";
+import { toHttpUrl } from "@/lib/links";
 import { apiError } from "@/lib/api-error";
 import { requireUser } from "@/lib/session";
 
@@ -39,13 +40,16 @@ export async function POST(req: Request) {
 
     if (contentType.includes("application/json")) {
       const { url } = (await req.json()) as { url?: string };
-      if (!url || !/^https?:\/\//i.test(url)) {
+      // Any web address is accepted — a portfolio, a repo, a Drive file, a
+      // credential page — and a paste without the scheme is still an address.
+      const target = url ? toHttpUrl(url) : null;
+      if (!target) {
         return NextResponse.json(
-          { error: "Provide an http(s) URL." },
+          { error: "That does not look like a public web address." },
           { status: 400 },
         );
       }
-      const result = await ingestUrl(userId, url);
+      const result = await ingestUrl(userId, target);
       return NextResponse.json(result);
     }
 
